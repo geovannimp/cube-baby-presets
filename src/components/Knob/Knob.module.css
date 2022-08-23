@@ -1,0 +1,38 @@
+.knob {
+  display: flex;
+  position: relative;
+  padding: 15%;
+  box-sizing: content-box;
+}
+.ticks {
+  position: absolute;
+}
+.tick {
+  position: absolute;
+  background: transparent;
+  box-shadow: inset 0 0 0 0 black;
+  border-bottom: 3px solid #ccc;
+  width: 3px;
+}
+.knobOuter {
+  border-radius: 50%;
+  border: 1px solid #222;
+  background: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.knobInner {
+  border-radius: 50%;
+  background: #333;
+}
+.grip {
+  position: absolute;
+  width: 12%;
+  height: 20%;
+  bottom: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  box-shadow: 0 0 3px 1px #222;
+}

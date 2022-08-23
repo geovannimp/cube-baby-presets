@@ -1,0 +1,19 @@
+{
+  "delete-preset-dialog-title": "Excluir preset",
+  "delete-preset-dialog-description": "Você tem certeza? Essa ação não pode ser revertida.",
+  "delete-preset-dialog-cancel-button": "Cancelar",
+  "delete-preset-dialog-confirm-button": "Confirmar",
+  "preset-invalid-custom-ir": "IR Personalizado precisa ser uma URL valida",
+  "preset-invalid-custom-ir-distance": "Distância do IR Personalizado precisa ser uma valor entre 0 e 100",
+  "preset-creating-title_creating": "Novo preset",
+  "preset-creating-title_editing": "Editar preset",
+  "preset-creating-title_viewing": "Ver preset",
+  "name-field": "Nome",
+  "description-field": "Descrição",
+  "version-field": "Selecione a versão",
+  "custom-ir-field": "IR Personalizado",
+  "custom-ir-distance-field": "Distância",
+  "preset-submit-button_creating": "Criar",
+  "preset-submit-button_editing": "Salvar",
+  "preset-delete-button": "Excluir"
+}

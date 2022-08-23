@@ -1,0 +1,9 @@
+{
+  "username-field": "Nome de usuario",
+  "email-field": "Email",
+  "password-field": "Senha",
+  "confirm-password-field": "Confirme sua senha",
+  "signup-button": "Cadastrar-se",
+  "with-account": "Já tem uma conta?",
+  "with-account-link": "Entrar."
+}

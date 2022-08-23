@@ -1,0 +1,9 @@
+{
+  "username-field": "Username",
+  "email-field": "Email",
+  "password-field": "Password",
+  "confirm-password-field": "Confirm password",
+  "signup-button": "Sign Up",
+  "with-account": "Do you have an account?",
+  "with-account-link": "Sign in."
+}

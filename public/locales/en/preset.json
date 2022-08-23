@@ -1,0 +1,19 @@
+{
+  "delete-preset-dialog-title": "Delete preset",
+  "delete-preset-dialog-description": "Are you sure? This action can't be undone.",
+  "delete-preset-dialog-cancel-button": "Cancel",
+  "delete-preset-dialog-confirm-button": "Confirm",
+  "preset-invalid-custom-ir": "Custom IR must be a valid url",
+  "preset-invalid-custom-ir-distance": "Custom IR distance must be between 0 and 100",
+  "preset-creating-title_creating": "New preset",
+  "preset-creating-title_editing": "Edit preset",
+  "preset-creating-title_viewing": "View preset",
+  "name-field": "Name",
+  "description-field": "Description",
+  "version-field": "Select Version",
+  "custom-ir-field": "Custom IR",
+  "custom-ir-distance-field": "Distance",
+  "preset-submit-button_creating": "Create",
+  "preset-submit-button_editing": "Save",
+  "preset-delete-button": "Delete"
+}
