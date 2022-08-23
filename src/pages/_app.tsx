@@ -5,6 +5,8 @@ import { ThemeProvider } from "next-themes";
 import { appWithTranslation } from "next-i18next";
 import { Toaster } from "react-hot-toast";
 
+import nextI18NextConfig from "../../next-i18next.config";
+
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -20,4 +22,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default appWithTranslation(MyApp);
+export default appWithTranslation(MyApp, nextI18NextConfig);

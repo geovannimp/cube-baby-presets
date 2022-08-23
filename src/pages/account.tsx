@@ -14,6 +14,7 @@ import { usePresets } from "../hooks/usePresets";
 import LoadingDots from "../components/LoadingDots";
 import { useModels } from "../hooks/useModels";
 import { PresetCard } from "../components/PresetCard";
+import nextI18nextConfig from "../../next-i18next.config";
 
 const Account: NextPage = () => {
   const { t } = useTranslation("account");
@@ -67,9 +68,18 @@ const Account: NextPage = () => {
 
 export const getServerSideProps = withPageAuth({
   redirectTo: "/signin",
-  getServerSideProps: async ({ locale }) => ({
-    props: await serverSideTranslations(locale!, ["common", "account"]),
-  }),
+  getServerSideProps: async ({ locale }) => {
+    const translations = await serverSideTranslations(
+      locale!,
+      ["common", "account"],
+      nextI18nextConfig
+    );
+    console.log({ locale, translations: JSON.stringify(translations) });
+
+    return {
+      props: translations,
+    };
+  },
 });
 
 export default Account;

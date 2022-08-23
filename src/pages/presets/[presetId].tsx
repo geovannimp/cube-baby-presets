@@ -1,5 +1,5 @@
 import { useUser } from "@supabase/supabase-auth-helpers/react";
-import type { GetServerSideProps, GetStaticProps, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
@@ -23,6 +23,7 @@ import {
   PresetKnobsValueMap,
   PresetService,
 } from "../../services/presetService";
+import nextI18nextConfig from "../../../next-i18next.config";
 
 const NewPreset: NextPage = () => {
   const { t } = useTranslation("preset");
@@ -260,8 +261,19 @@ const NewPreset: NextPage = () => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
-  props: await serverSideTranslations(locale!, ["common", "preset"]),
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: true,
+  };
+};
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: await serverSideTranslations(
+    locale!,
+    ["common", "preset"],
+    nextI18nextConfig
+  ),
 });
 
 export default NewPreset;
