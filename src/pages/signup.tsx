@@ -1,11 +1,15 @@
 import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { GetStaticProps } from "next";
 import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
 
 import { UserService } from "../services/userService";
 import LoadingDots from "../components/LoadingDots";
@@ -18,59 +22,60 @@ const SignUp = () => {
   const router = useRouter();
   const { user } = useUser();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{
-    type?: "note" | "error";
-    content?: string;
-  }>({});
+  const schema = z
+    .object({
+      username: z.string().min(1, t("username-field-required-error")),
+      email: z
+        .string({
+          required_error: t("email-field-required-error"),
+        })
+        .email(t("email-field-validation-error")),
+      password: z
+        .string({
+          required_error: t("password-field-required-error"),
+        })
+        .min(6, t("password-field-min-length-error")),
+      confirmPassword: z.string({
+        required_error: t("password-field-required-error"),
+      }),
+    })
+    .required()
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("password-confirmation-do-not-match"),
+      path: ["confirmPassword"], // path of error
+    });
 
-  const handleSignup = async () => {
-    setMessage({});
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    mode: "onBlur",
+  });
 
-    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-      setMessage({
-        type: "error",
-        content: "Email is invalid.",
+  const handleSignup = handleSubmit(async ({ username, email, password }) => {
+    try {
+      await UserService.signup({
+        email,
+        username,
+        password,
       });
-      return;
-    }
-
-    if (confirmPassword !== password) {
-      setMessage({
-        type: "error",
-        content: "Passwords must be equal.",
+      toast.success(t("submit-success-message"), {
+        position: "bottom-center",
+        style: {
+          marginBottom: 50,
+        },
       });
-      return;
-    }
-
-    if (email && username && password) {
-      setLoading(true);
-      try {
-        await UserService.signup({
-          email,
-          username,
-          password,
-        });
-        setMessage({
-          type: "note",
-          content: "Please, check you email to confirm your account.",
-        });
-      } catch (error) {
-        setMessage({ type: "error", content: (error as any)?.message });
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setMessage({
-        type: "error",
-        content: "All fields are required.",
+    } catch ({ message }: any) {
+      toast.error(message as string, {
+        position: "bottom-center",
+        style: {
+          marginBottom: 50,
+        },
       });
     }
-  };
+  });
 
   useEffect(() => {
     if (user) {
@@ -90,50 +95,39 @@ const SignUp = () => {
             Cube Baby Presets
           </p>
 
-          {message.content && (
-            <div
-              className={`${
-                message.type === "error" ? "text-pink-500" : "text-green-500"
-              } border ${
-                message.type === "error"
-                  ? "border-pink-500"
-                  : "border-green-500"
-              } p-3`}
-            >
-              {message.content}
-            </div>
-          )}
-
-          <form className="flex flex-col space-y-2">
+          <form onSubmit={handleSignup} className="flex flex-col gap-4">
             <Input
               label={`${t("username-field")} *`}
-              onChange={(e) => setUsername(e.target.value)}
-              required
+              {...register("username")}
+              helperText={errors.username?.message}
+              error={!!errors.username}
             />
             <Input
               label={`${t("email-field")} *`}
               type="email"
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
+              helperText={errors.email?.message}
+              error={!!errors.email}
               required
             />
             <Input
               label={`${t("password-field")} *`}
               type="password"
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
+              helperText={errors.password?.message}
+              error={!!errors.password}
             />
             <Input
               label={`${t("confirm-password-field")} *`}
               type="password"
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              {...register("confirmPassword")}
+              helperText={errors.confirmPassword?.message}
+              error={!!errors.confirmPassword}
             />
+            <Button className="mt-2" disabled={!isValid} type="submit">
+              {isSubmitting ? <LoadingDots /> : t("signup-button")}
+            </Button>
           </form>
-
-          <Button
-            disabled={loading || !email.length || !password.length}
-            onClick={handleSignup}
-          >
-            {loading ? <LoadingDots /> : t("signup-button")}
-          </Button>
 
           <span className="pt-1 text-center text-sm">
             <span className="text-zinc-200">{t("with-account")}</span>
