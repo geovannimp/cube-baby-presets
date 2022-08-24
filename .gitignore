@@ -38,3 +38,6 @@ next-env.d.ts
 # deployment
 deploy/.terraform
 deploy/google-credentials.json
+
+# translation backups
+/public/locales/**/*_old.json

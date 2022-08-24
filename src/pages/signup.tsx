@@ -24,7 +24,13 @@ const SignUp = () => {
 
   const schema = z
     .object({
-      username: z.string().min(1, t("username-field-required-error")),
+      username: z
+        .string()
+        .min(1, t("username-field-required-error"))
+        .refine(
+          UserService.isUsernameAvailable,
+          t("username-unavailable-error")
+        ),
       email: z
         .string({
           required_error: t("email-field-required-error"),

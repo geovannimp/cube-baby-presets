@@ -93,6 +93,15 @@ const getProfile = async (userId: string) => {
   }
 };
 
+const isUsernameAvailable = async (username: string) => {
+  const { body: profiles } = await supabaseClient
+    .from<Profile>("profiles")
+    .select("username")
+    .eq("username", username);
+
+  return !profiles?.length;
+};
+
 const logout = async () => {
   const { error } = await supabaseClient.auth.signOut();
 
@@ -108,4 +117,5 @@ export const UserService = {
   signup,
   getProfile,
   logout,
+  isUsernameAvailable,
 };

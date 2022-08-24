@@ -1,12 +1,12 @@
 {
   "username-field-required-error": "Nome de usuario é obrigatório",
+  "username-unavailable-error": "Nome de usuario não esta disponivel",
   "email-field-required-error": "Campo de email é obrigatório",
   "email-field-validation-error": "Email inválido",
   "password-field-required-error": "Campo de senha é obrigatório",
   "password-field-min-length-error": "Senha precisa ter ao menos 6 caracteres",
   "password-confirmation-do-not-match": "As senhas precisam ser iguais",
   "submit-success-message": "Por favor, confira seu email para confirmar sua conta",
-  "submit-invalid-grant-error": "Email ou senha inválido",
   "username-field": "Nome de usuario",
   "email-field": "Email",
   "password-field": "Senha",
