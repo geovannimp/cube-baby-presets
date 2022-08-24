@@ -1,4 +1,9 @@
 {
+  "email-field-required-error": "Email is required",
+  "email-field-validation-error": "Invalid email",
+  "password-field-required-error": "Password is required",
+  "password-field-min-length-error": "Password must have at least 6 characters",
+  "submit-invalid-grant-error": "Email or password is invalid",
   "email-field": "Email",
   "password-field": "Password",
   "signin-button": "Sign In",
