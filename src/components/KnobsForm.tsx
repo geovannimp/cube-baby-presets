@@ -32,7 +32,7 @@ export const KnobsForm = ({
   };
 
   return (
-    <form className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
       <div className="flex justify-center">
         <Pedal
           model={model}
@@ -94,6 +94,6 @@ export const KnobsForm = ({
           </fieldset>
         ))}
       </Card>
-    </form>
+    </div>
   );
 };
