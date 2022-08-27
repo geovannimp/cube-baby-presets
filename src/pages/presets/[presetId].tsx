@@ -20,21 +20,25 @@ import LoadingDots from "../../components/LoadingDots";
 import { Select } from "../../components/Select";
 import { Textarea } from "../../components/Textarea";
 import { useModels } from "../../hooks/useModels";
-import { Preset, PresetService } from "../../services/presetService";
 import nextI18nextConfig from "../../../next-i18next.config";
 import { usePresetFormSchema } from "../../hooks/usePresetFormSchema";
+import { usePreset } from "../../hooks/usePreset";
+import { useUpdatePreset } from "../../hooks/useUpdatePreset";
+import { useCreatePreset } from "../../hooks/useCreatePreset";
 
-interface NewPresetProps {
-  preset?: Preset;
-}
-
-const NewPreset: NextPage<NewPresetProps> = ({ preset }) => {
+const NewPreset: NextPage = () => {
   const { t } = useTranslation("preset");
   const { user } = useUser();
   const router = useRouter();
   const { presetId } = router.query;
 
-  const { models } = useModels();
+  const { data: preset } = usePreset(
+    presetId !== "new" ? Number(presetId) : undefined
+  );
+  const { data: models } = useModels();
+  const { mutateAsync: createPreset } = useCreatePreset();
+  const { mutateAsync: updatePreset } = useUpdatePreset();
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   const modelIds = useMemo(() => models?.map((m) => m.id) ?? [], [models]);
@@ -98,7 +102,7 @@ const NewPreset: NextPage<NewPresetProps> = ({ preset }) => {
     }) => {
       if (user?.id && modelId) {
         if (preset?.id) {
-          await PresetService.updatePreset({
+          await updatePreset({
             id: preset.id,
             name,
             knobs_values: knobValues,
@@ -114,7 +118,7 @@ const NewPreset: NextPage<NewPresetProps> = ({ preset }) => {
               : undefined,
           });
         } else {
-          await PresetService.createPreset({
+          await createPreset({
             name,
             knobs_values: knobValues,
             model_id: modelId,
@@ -302,21 +306,12 @@ const NewPreset: NextPage<NewPresetProps> = ({ preset }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({
-  locale,
-  query: { presetId },
-}) => ({
-  props: {
-    ...(await serverSideTranslations(
-      locale!,
-      ["common", "preset"],
-      nextI18nextConfig
-    )),
-    preset:
-      presetId !== "new"
-        ? await PresetService.getPreset(Number(presetId))
-        : null,
-  },
+export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
+  props: await serverSideTranslations(
+    locale!,
+    ["common", "preset"],
+    nextI18nextConfig
+  ),
 });
 
 export default NewPreset;

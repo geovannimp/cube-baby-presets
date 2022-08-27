@@ -1,21 +1,12 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Preset, PresetService } from "../services/presetService";
 
 export const usePreset = (presetId?: number) => {
-  const [loading, setLoading] = useState(false);
-  const [preset, setPreset] = useState<Preset>();
-
-  useEffect(() => {
-    if (presetId) {
-      setLoading(true);
-      PresetService.getPreset(presetId)
-        .then(setPreset)
-        .finally(() => setLoading(false));
+  return useQuery(
+    ["posts", presetId],
+    async () => (presetId ? PresetService.getPreset(presetId) : undefined),
+    {
+      enabled: !!presetId,
     }
-  }, [presetId]);
-
-  return {
-    preset,
-    loading,
-  };
+  );
 };

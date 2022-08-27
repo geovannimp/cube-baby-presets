@@ -16,8 +16,10 @@ import { PresetCard } from "../../components/PresetCard";
 const Presets: NextPage = () => {
   const { t } = useTranslation("presets");
   const { user } = useUser();
-  const { presets, loading } = usePresets();
-  const { models } = useModels();
+  const { data: presets, isLoading: isLoadingPresets } = usePresets();
+  const { data: models, isLoading: isLoadingModels } = useModels();
+
+  const isLoading = isLoadingPresets || isLoadingModels;
 
   return (
     <>
@@ -40,7 +42,7 @@ const Presets: NextPage = () => {
           )}
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <LoadingDots />
         ) : presets?.length ? (
           <div className="mt-4 grid gap-6 md:grid-cols-3 grid-cols-1">

@@ -20,8 +20,10 @@ const Account: NextPage = () => {
   const { t } = useTranslation("account");
   const { user } = useUser();
   const options = useMemo(() => ({ userId: user?.id }), [user?.id]);
-  const { presets, loading } = usePresets(options);
-  const { models } = useModels();
+  const { data: presets, isLoading: isLoadingPresets } = usePresets(options);
+  const { data: models, isLoading: isLoadingModels } = useModels();
+
+  const isLoading = isLoadingModels || isLoadingPresets;
 
   return (
     <>
@@ -42,7 +44,7 @@ const Account: NextPage = () => {
           </Link>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <LoadingDots />
         ) : presets?.length ? (
           <div className="mt-4 grid gap-6 md:grid-cols-3 grid-cols-1">
