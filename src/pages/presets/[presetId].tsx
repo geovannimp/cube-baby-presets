@@ -1,5 +1,5 @@
 import { useUser } from "@supabase/supabase-auth-helpers/react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
@@ -20,13 +20,15 @@ import LoadingDots from "../../components/LoadingDots";
 import { Select } from "../../components/Select";
 import { Textarea } from "../../components/Textarea";
 import { useModels } from "../../hooks/useModels";
-import { usePreset } from "../../hooks/usePreset";
-import { Model, ModelId } from "../../services/modelService";
-import { PresetService } from "../../services/presetService";
+import { Preset, PresetService } from "../../services/presetService";
 import nextI18nextConfig from "../../../next-i18next.config";
 import { usePresetFormSchema } from "../../hooks/usePresetFormSchema";
 
-const NewPreset: NextPage = () => {
+interface NewPresetProps {
+  preset?: Preset;
+}
+
+const NewPreset: NextPage<NewPresetProps> = ({ preset }) => {
   const { t } = useTranslation("preset");
   const { user } = useUser();
   const router = useRouter();
@@ -34,10 +36,6 @@ const NewPreset: NextPage = () => {
 
   const { models } = useModels();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-
-  const { preset } = usePreset(
-    presetId && presetId !== "new" ? Number(presetId) : undefined
-  );
 
   const modelIds = useMemo(() => models?.map((m) => m.id) ?? [], [models]);
   const schema = usePresetFormSchema(models);
@@ -60,7 +58,7 @@ const NewPreset: NextPage = () => {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid, isSubmitting, dirtyFields },
   } = formMethods;
 
   const isUsingCustomIR = !!watch("customIR");
@@ -160,7 +158,7 @@ const NewPreset: NextPage = () => {
   }, [preset, models, reset]);
 
   useEffect(() => {
-    if (selectedModel) {
+    if (selectedModel && dirtyFields.modelId) {
       setValue(
         "knobValues",
         Object.keys(selectedModel.knobs).reduce(
@@ -172,7 +170,7 @@ const NewPreset: NextPage = () => {
         }
       );
     }
-  }, [selectedModel, setValue]);
+  }, [selectedModel, setValue, dirtyFields.modelId]);
 
   return (
     <>
@@ -304,19 +302,21 @@ const NewPreset: NextPage = () => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: [],
-    fallback: true,
-  };
-};
-
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-  props: await serverSideTranslations(
-    locale!,
-    ["common", "preset"],
-    nextI18nextConfig
-  ),
+export const getServerSideProps: GetServerSideProps = async ({
+  locale,
+  query: { presetId },
+}) => ({
+  props: {
+    ...(await serverSideTranslations(
+      locale!,
+      ["common", "preset"],
+      nextI18nextConfig
+    )),
+    preset:
+      presetId !== "new"
+        ? await PresetService.getPreset(Number(presetId))
+        : null,
+  },
 });
 
 export default NewPreset;
