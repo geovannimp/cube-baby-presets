@@ -1,12 +1,11 @@
 import { supabaseClient } from "@supabase/supabase-auth-helpers/nextjs";
 
-export type PresetKnobsValueMap = { [knob_name: string]: number };
 export type PresetCustomIR = { url: string; distance: number };
 export interface Preset {
   id: number;
   name: string;
   description: string;
-  knobs_values: PresetKnobsValueMap;
+  knobs_values: Record<string, number>;
   created_at?: Date;
   published: boolean;
   user_id: string;

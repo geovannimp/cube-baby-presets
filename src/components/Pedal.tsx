@@ -1,13 +1,12 @@
 import { Model } from "../services/modelService";
-import { PresetKnobsValueMap } from "../services/presetService";
 import { Knob } from "./Knob";
 
 const KNOBS_WITH_TICK = ["ir_cab", "type"];
 
 interface PedalProps {
   model: Model;
-  knobValues: PresetKnobsValueMap;
-  onChange: (newValue: PresetKnobsValueMap) => void;
+  knobValues: Record<string, number>;
+  onChange: (newValue: Record<string, number>) => void;
   disabled?: boolean;
 }
 

@@ -23,7 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <label
         className={clsx("relative block", containerClassName)}
-        htmlFor={props.id}
+        htmlFor={props.name}
       >
         <span
           className={clsx(

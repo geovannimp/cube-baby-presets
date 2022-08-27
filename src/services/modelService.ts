@@ -1,4 +1,5 @@
 export type ModelId = "cube-baby" | "cube-baby-bass" | "cube-baby-ac";
+
 export interface Model {
   id: ModelId;
   name: string;
