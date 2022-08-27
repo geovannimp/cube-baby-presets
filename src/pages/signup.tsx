@@ -87,7 +87,7 @@ const SignUp = () => {
     if (user) {
       router.replace("/account");
     }
-  }, [user]);
+  }, [user, router]);
 
   return (
     <>

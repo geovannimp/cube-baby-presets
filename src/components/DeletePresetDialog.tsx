@@ -2,7 +2,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { Fragment } from "react";
-import { PresetService } from "../services/presetService";
+import { useDeletePreset } from "../hooks/useDeletePreset";
 import { Button } from "./Button";
 
 interface DeletePresetDialog {
@@ -18,9 +18,10 @@ export const DeletePresetDialog = ({
 }: DeletePresetDialog) => {
   const { t } = useTranslation("preset");
   const router = useRouter();
+  const { mutateAsync: deletePresetAsync } = useDeletePreset();
 
   const deletePreset = () => {
-    PresetService.deletePreset(presetId).then(() => router.replace("/account"));
+    deletePresetAsync(presetId).then(() => router.replace("/account"));
   };
 
   return (

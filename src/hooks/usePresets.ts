@@ -1,23 +1,8 @@
-import { useEffect, useState } from "react";
-import {
-  GetPresetsOptions,
-  Preset,
-  PresetService,
-} from "../services/presetService";
+import { useQuery } from "@tanstack/react-query";
+import { GetPresetsOptions, PresetService } from "../services/presetService";
 
 export const usePresets = (options?: GetPresetsOptions) => {
-  const [loading, setLoading] = useState(false);
-  const [presets, setPresets] = useState<Preset[]>();
-
-  useEffect(() => {
-    setLoading(true);
+  return useQuery(["presets", options?.userId], async () =>
     PresetService.getPresets(options)
-      .then(setPresets)
-      .finally(() => setLoading(false));
-  }, [options]);
-
-  return {
-    presets,
-    loading,
-  };
+  );
 };

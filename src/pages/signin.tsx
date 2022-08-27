@@ -72,7 +72,7 @@ const SignIn = () => {
     if (user) {
       router.replace("/account");
     }
-  }, [user]);
+  }, [user, router]);
 
   if (!user)
     return (
