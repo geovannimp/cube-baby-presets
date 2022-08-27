@@ -1,3 +1,5 @@
+import clsx from "clsx";
+import { useMemo } from "react";
 import { Model } from "../services/modelService";
 import { Knob } from "./Knob";
 
@@ -16,9 +18,36 @@ export const Pedal = ({
   onChange,
   disabled = false,
 }: PedalProps) => {
+  const colors = useMemo(() => {
+    switch (model.id) {
+      case "cube-baby":
+        return {
+          background: "bg-neutral-900",
+          border: "border-gray-700",
+          text: "text-gray-100",
+        };
+      case "cube-baby-ac":
+        return {
+          background: "bg-amber-200",
+          border: "border-amber-900",
+          text: "text-gray-900",
+        };
+      case "cube-baby-bass":
+        return {
+          background: "bg-sky-900",
+          border: "border-sky-700",
+          text: "text-gray-100",
+        };
+    }
+  }, [model.id]);
+
   return (
     <div
-      className="flex flex-col basis-auto overflow-auto border box-content border-gray-700 rounded bg-neutral-900"
+      className={clsx(
+        `flex flex-col basis-auto overflow-auto border box-content rounded`,
+        colors.background,
+        colors.border
+      )}
       style={{ maxWidth: 680 }}
     >
       <div className="px-8" style={{ width: 680 }}>
@@ -44,7 +73,12 @@ export const Pedal = ({
                   }
                   disabled={disabled}
                 />
-                <h6 className="text-xs font-bold">
+                <h6
+                  className={clsx(
+                    "text-xs font-bold text-gray-100",
+                    colors.text
+                  )}
+                >
                   {knobName.replace("_", " ").toUpperCase()}
                 </h6>
               </div>
