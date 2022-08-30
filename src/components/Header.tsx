@@ -82,7 +82,7 @@ export const Header = () => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 ring-black ring-opacity-5 focus:outline-none z-50">
+                    <Menu.Items className="absolute left-0 md:right-0 mt-2 w-56 origin-top-right text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 ring-black ring-opacity-5 focus:outline-none z-50">
                       <Menu.Item>
                         <CustomLink href="/account">
                           <button className="my-1 flex w-full items-center pl-4 py-2 text-sm hover:bg-gray-700">
