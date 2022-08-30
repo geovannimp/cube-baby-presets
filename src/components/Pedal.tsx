@@ -25,18 +25,21 @@ export const Pedal = ({
           background: "bg-neutral-900",
           border: "border-gray-700",
           text: "text-gray-100",
+          tick: "!bg-gray-100",
         };
       case "cube-baby-ac":
         return {
           background: "bg-amber-200",
           border: "border-amber-900",
           text: "text-gray-900",
+          tick: "!bg-gray-900",
         };
       case "cube-baby-bass":
         return {
           background: "bg-sky-900",
           border: "border-sky-700",
           text: "text-gray-100",
+          tick: "!bg-gray-100",
         };
     }
   }, [model.id]);
@@ -55,7 +58,7 @@ export const Pedal = ({
           {Object.entries(model.knobs).map(
             ([knobName, [minValue, maxValue]]) => (
               <div
-                className="flex flex-col items-center"
+                className="flex flex-col items-center gap-1"
                 key={`knob-${model.id}-field-${knobName}`}
                 style={knobName === "volume" ? { marginRight: 32 } : undefined}
               >
@@ -64,6 +67,7 @@ export const Pedal = ({
                   numTicks={
                     KNOBS_WITH_TICK.includes(knobName) ? maxValue : undefined
                   }
+                  tickClassName={colors.tick}
                   degrees={260}
                   min={minValue}
                   max={maxValue}
@@ -74,10 +78,7 @@ export const Pedal = ({
                   disabled={disabled}
                 />
                 <h6
-                  className={clsx(
-                    "text-xs font-bold text-gray-100",
-                    colors.text
-                  )}
+                  className={`text-xs font-bold text-gray-100 ${colors.text}`}
                 >
                   {knobName.replace("_", " ").toUpperCase()}
                 </h6>
@@ -86,9 +87,9 @@ export const Pedal = ({
           )}
         </div>
         <div className="flex pt-8 pb-4 justify-between">
-          <div className="w-12 h-12 rounded-full bg-neutral-400" />
-          <div className="w-12 h-12 rounded-full bg-neutral-400" />
-          <div className="w-12 h-12 rounded-full bg-neutral-400" />
+          <div className="w-14 h-14 rounded-full bg-gray-300 border-8 border-gray-400 " />
+          <div className="w-14 h-14 rounded-full bg-gray-300 border-8 border-gray-400 " />
+          <div className="w-14 h-14 rounded-full bg-gray-300 border-8 border-gray-400 " />
         </div>
       </div>
     </div>

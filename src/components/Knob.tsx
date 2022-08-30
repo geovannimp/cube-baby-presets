@@ -1,5 +1,5 @@
-import { CSSProperties, useEffect, useMemo, useState } from "react";
-import s from "./Knob.module.css";
+import clsx from "clsx";
+import { CSSProperties, useMemo } from "react";
 
 interface KnobProps {
   size?: number;
@@ -9,6 +9,7 @@ interface KnobProps {
   degrees?: number;
   value?: number;
   style?: CSSProperties;
+  tickClassName?: string;
   onChange: (val: number) => void;
   disabled?: boolean;
 }
@@ -33,6 +34,7 @@ export const Knob = ({
   disabled = false,
   onChange,
   style,
+  tickClassName,
 }: KnobProps) => {
   const fullAngle = degrees;
   const startAngle = (360 - degrees) / 2;
@@ -85,8 +87,8 @@ export const Knob = ({
       const tick = {
         deg: deg,
         tickStyle: {
-          height: tickSize + 5,
-          left: tickSize - 1,
+          height: tickSize + 6,
+          left: tickSize - 2,
           top: tickSize,
           transform: "rotate(" + deg + "deg)",
           transformOrigin: "top",
@@ -123,21 +125,35 @@ export const Knob = ({
   );
 
   return (
-    <div className={s.knob} style={knobStyle}>
-      <div className={s.ticks}>
+    <div className="flex relative box-content" style={knobStyle}>
+      <div className="absolute">
         {numTicks
           ? renderTicks().map((tick, i) => (
-              <div key={i} className={s.tick} style={tick.tickStyle} />
+              <div
+                key={i}
+                className="absolute bg-transparent w-1"
+                style={tick.tickStyle}
+              >
+                <div
+                  className={clsx(
+                    "absolute bottom-0 w-1 h-1 rounded-full bg-gray-700",
+                    tickClassName
+                  )}
+                />
+              </div>
             ))
           : null}
       </div>
       <div
-        className={s.knobOuter}
+        className="flex justify-center items-center rounded-full border-2 border-gray-400 bg-gray-300"
         style={outerStyle}
         onMouseDown={!disabled ? startDrag : undefined}
       >
-        <div className={s.knobInner} style={innerStyle}>
-          <div className={s.grip} />
+        <div
+          className="relative flex justify-center items-end rounded-full bg-gray-700"
+          style={innerStyle}
+        >
+          <div className="w-1/12 h-1/5 bg-gray-300 mb-0.5" />
         </div>
       </div>
     </div>
