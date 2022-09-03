@@ -1,5 +1,10 @@
 {
   "account-button": "Conta",
+  "profile-button": "Meu perfil",
+  "theme-button": "Tema",
+  "theme-dark-button": "Escuro",
+  "theme-light-button": "Claro",
+  "theme-system-button": "Sistema",
   "logout-button": "Sair",
   "login-button": "Entrar",
   "open-preset-button": "Ver",
