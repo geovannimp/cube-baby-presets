@@ -1,27 +1,32 @@
 import { useMemo } from "react";
-import { GetStaticProps, NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-import { withPageAuth } from "@supabase/supabase-auth-helpers/nextjs";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
+import { useRouter } from "next/router";
+import { UserCircleIcon } from "@heroicons/react/20/solid";
 
-import { Header } from "../components/Header";
-import { Button } from "../components/Button";
-import { Container } from "../components/Container";
-import { usePresets } from "../hooks/usePresets";
-import LoadingDots from "../components/LoadingDots";
-import { useModels } from "../hooks/useModels";
-import { PresetCard } from "../components/PresetCard";
-import nextI18nextConfig from "../../next-i18next.config";
+import { Header } from "../../components/Header";
+import { Container } from "../../components/Container";
+import { usePresets } from "../../hooks/usePresets";
+import LoadingDots from "../../components/LoadingDots";
+import { useModels } from "../../hooks/useModels";
+import { PresetCard } from "../../components/PresetCard";
+import nextI18nextConfig from "../../../next-i18next.config";
+import { useProfile } from "../../hooks/useProfile";
 
 const Account: NextPage = () => {
-  const { t } = useTranslation("account");
-  const { user } = useUser();
-  const options = useMemo(() => ({ userId: user?.id }), [user?.id]);
+  const { t } = useTranslation("profile");
+  const router = useRouter();
+  const { userId } = router.query;
+
+  const options = useMemo(
+    () => (typeof userId === "string" ? { userId } : undefined),
+    [userId]
+  );
   const { data: presets, isLoading: isLoadingPresets } = usePresets(options);
   const { data: models, isLoading: isLoadingModels } = useModels();
+  const { data: profile } = useProfile(options?.userId);
 
   const isLoading = isLoadingModels || isLoadingPresets;
 
@@ -34,14 +39,16 @@ const Account: NextPage = () => {
 
       <Header />
 
+      <div className="flex justify-center w-full dark:bg-slate-700">
+        <Container className="gap-4 my-8 flex-col justify-center items-center md:flex-row md:justify-start md:items-center">
+          <UserCircleIcon className="h-12 w-12 mr-1 inline-block" />{" "}
+          <p className="text-xl font-bold">{profile?.username}</p>
+        </Container>
+      </div>
+
       <Container className="gap-4 my-8">
         <div className="flex flex-row justify-between items-center">
           <p className="font-bold text-2xl">{t("presets-list-title")}</p>
-          <Link href="/presets/new">
-            <Button>
-              <span>{t("presets-list-button")}</span>
-            </Button>
-          </Link>
         </div>
 
         {isLoading ? (
@@ -68,19 +75,12 @@ const Account: NextPage = () => {
   );
 };
 
-export const getServerSideProps = withPageAuth({
-  redirectTo: "/signin",
-  getServerSideProps: async ({ locale }) => {
-    const translations = await serverSideTranslations(
-      locale!,
-      ["common", "account"],
-      nextI18nextConfig
-    );
-
-    return {
-      props: translations,
-    };
-  },
+export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
+  props: await serverSideTranslations(
+    locale!,
+    ["common", "profile"],
+    nextI18nextConfig
+  ),
 });
 
 export default Account;
