@@ -12,6 +12,7 @@ import { useFloating, shift, offset } from "@floating-ui/react-dom";
 import { useTheme } from "next-themes";
 import {
   ArrowLeftOnRectangleIcon,
+  IdentificationIcon,
   SwatchIcon,
   UserIcon,
 } from "@heroicons/react/20/solid";
@@ -35,7 +36,7 @@ export const Header = () => {
   const { user } = useUser();
   const router = useRouter();
 
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
 
   const { data: profile } = useProfile(user?.id);
 
@@ -48,10 +49,6 @@ export const Header = () => {
       offset(12),
     ],
   });
-
-  useEffect(() => {
-    console.log(theme);
-  }, [theme]);
 
   const logout = () => {
     UserService.logout().then(() => {
@@ -104,6 +101,12 @@ export const Header = () => {
                       <button className="my-1 flex w-full items-center pl-4 py-2 text-sm hover:bg-gray-700 hover:text-gray-300">
                         <UserIcon className="w-4 h-4 mr-2" />
                         {t("account-button")}
+                      </button>
+                    </CustomLink>
+                    <CustomLink href={`/profile/${user.id}`}>
+                      <button className="my-1 flex w-full items-center pl-4 py-2 text-sm hover:bg-gray-700 hover:text-gray-300">
+                        <IdentificationIcon className="w-4 h-4 mr-2" />
+                        {t("profile-button")}
                       </button>
                     </CustomLink>
                     <Disclosure>
