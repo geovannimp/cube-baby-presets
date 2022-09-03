@@ -39,7 +39,7 @@ const Account: NextPage = () => {
 
       <Header />
 
-      <div className="flex justify-center w-full dark:bg-slate-700">
+      <div className="flex justify-center w-full bg-slate-200 dark:bg-slate-700">
         <Container className="gap-4 my-8 flex-col justify-center items-center md:flex-row md:justify-start md:items-center">
           <UserCircleIcon className="h-12 w-12 mr-1 inline-block" />{" "}
           <p className="text-xl font-bold">{profile?.username}</p>

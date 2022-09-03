@@ -51,7 +51,7 @@ export const PresetCard = ({ preset, modelName }: PresetCardProps) => {
         </div>
 
         <Link href={`/profile/${preset.user_id}`}>
-          <p className="flex items-center px-2 py-0.5 mt-2 cursor-pointer font-semibold self-start text-gray-100 transition-colors duration-300 transform rounded-md bg-black bg-opacity-20 text-sm hover:bg-opacity-30">
+          <p className="flex items-center px-2 py-0.5 mt-2 cursor-pointer font-semibold self-start text-gray-100 transition-colors duration-300 transform rounded-md bg-zinc-600 dark:bg-slate-200 dark:text-slate-800 text-sm hover:bg-opacity-80">
             <UserCircleIcon className="h-4 w-4 mr-1 inline-block" />{" "}
             {preset.user.username}
           </p>
