@@ -40,8 +40,25 @@ const cubeBabyBassModel: Model = {
   },
 };
 
+const cubeBabyAcModel: Model = {
+  id: "cube-baby-ac",
+  name: "Cube Baby AC",
+  knobs: {
+    volume: [0, 127],
+    ir_cab: [0, 8],
+    time: [0, 127],
+    space: [0, 31],
+    mod: [0, 15],
+    anti_fb: [0, 8],
+    comp: [0, 8],
+    bass: [0, 127],
+    mid: [0, 127],
+    treb: [0, 127],
+  },
+};
+
 const getModels = async (): Promise<Model[]> => {
-  return Promise.resolve([cubeBabyModel, cubeBabyBassModel]);
+  return Promise.resolve([cubeBabyModel, cubeBabyBassModel, cubeBabyAcModel]);
 };
 
 export const ModelService = { getModels };
