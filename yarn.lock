@@ -2586,6 +2586,11 @@ quick-temp@^0.1.8:
     rimraf "^2.5.4"
     underscore.string "~3.3.4"
 
+radash@^11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/radash/-/radash-11.0.0.tgz#925698e94b554336fc159c253ac33a9a49881835"
+  integrity sha512-CRWxTFTDff0IELGJ/zz58yY4BDgyI14qSM5OLNKbCItJrff7m7dXbVF0kWYVCXQtPb3SXIVhXvAImH6eT7VLSg==
+
 react-dom@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.2.0.tgz"

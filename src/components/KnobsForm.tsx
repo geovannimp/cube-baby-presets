@@ -31,7 +31,7 @@ export const KnobsForm = ({
     setValue("knobValues", newValues);
   };
 
-  return (
+  return knobValues ? (
     <div className="flex flex-col gap-8">
       <div className="flex justify-center">
         <Pedal
@@ -95,5 +95,7 @@ export const KnobsForm = ({
         ))}
       </Card>
     </div>
+  ) : (
+    <></>
   );
 };

@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Preset, PresetService } from "../services/presetService";
+import { PresetService } from "../services/presetService";
 
 export const usePreset = (presetId?: number) => {
   return useQuery(
-    ["posts", presetId],
+    ["presets", presetId],
     async () => (presetId ? PresetService.getPreset(presetId) : undefined),
     {
       enabled: !!presetId,

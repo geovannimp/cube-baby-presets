@@ -1,5 +1,11 @@
 {
   "presets-list-title": "Todos presets",
   "presets-list-button": "Novo preset",
-  "presets-list-empty": "Nenhum preset ainda"
+  "presets-list-empty": "Nenhum preset ainda",
+  "presets-list-search-filter": "Pesquisa",
+  "presets-list-search-filter-placeholder": "Pesquise presets",
+  "presets-list-model-filter": "Modelo",
+  "presets-list-model-filter-all": "Todos modelos",
+  "presets-list-user-filter": "Usuário",
+  "presets-list-user-filter-all": "Todos usuários"
 }
