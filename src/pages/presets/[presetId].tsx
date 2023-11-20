@@ -41,7 +41,6 @@ const NewPreset: NextPage = () => {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
-  const modelIds = useMemo(() => models?.map((m) => m.id) ?? [], [models]);
   const schema = usePresetFormSchema(models);
 
   const formMethods = useForm<z.infer<typeof schema>>({
@@ -224,10 +223,9 @@ const NewPreset: NextPage = () => {
                         label={`${t("version-field")} *`}
                         {...field}
                         disabled={dialogMode === "viewing"}
-                        extractLabel={(modelId) =>
-                          models.find((m) => m.id === modelId)?.name ?? ""
-                        }
-                        options={modelIds}
+                        extractLabel={(model) => model.name}
+                        extractValue={(model) => model.id}
+                        options={models}
                       />
                     )}
                   />
