@@ -8,6 +8,7 @@ import {
   PaletteIcon,
   UserIcon,
 } from "lucide-react";
+import clsx from "clsx";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +31,10 @@ export const Header = () => {
   const { user } = useUser();
   const router = useRouter();
   const { setTheme } = useTheme();
-  const { data: profile } = useProfile(user?.id);
+  const { data: profile, isLoading: isProfileLoading } = useProfile(user?.id);
+
+  const isHome = router.pathname === "/";
+  const isPresets = router.pathname.startsWith("/presets");
 
   const logout = () => {
     UserService.logout().then(() => {
@@ -39,84 +43,101 @@ export const Header = () => {
   };
 
   return (
-    <nav className="flex w-full justify-center border-b bg-background shadow-sm">
-      <Container className="my-4">
-        <div className="md:flex md:items-center md:justify-between">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="text-2xl font-bold text-foreground transition-colors hover:text-muted-foreground"
-            >
-              Cube Baby Presets
-            </Link>
-          </div>
+    <header className="flex w-full justify-center border-b bg-background">
+      <Container className="py-3">
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            aria-current={isHome ? "page" : undefined}
+            className="shrink-0 text-xl font-bold text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            Cube Baby Presets
+          </Link>
 
-          <div className="mt-2 flex flex-1 items-center justify-between md:mt-0">
-            <div className="flex flex-col md:mx-8 md:flex-row md:items-center">
-              <Link
-                href="/presets"
-                className="rounded-md px-2 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Presets
-              </Link>
-            </div>
-            <div className="flex items-center">
-              {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={<Button variant="secondary" />}
-                  >
-                    {profile?.username ?? "Loading..."}
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem
-                        nativeButton={false}
-                        render={<Link href="/account" />}
-                      >
-                        <UserIcon data-icon="inline-start" />
-                        {t("account-button")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        nativeButton={false}
-                        render={<Link href={`/profile/${user.id}`} />}
-                      >
-                        <IdCardIcon data-icon="inline-start" />
-                        {t("profile-button")}
-                      </DropdownMenuItem>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <PaletteIcon data-icon="inline-start" />
-                          {t("theme-button")}
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
-                          <DropdownMenuItem onClick={() => setTheme("dark")}>
-                            {t("theme-dark-button")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setTheme("light")}>
-                            {t("theme-light-button")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setTheme("system")}>
-                            {t("theme-system-button")}
-                          </DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuItem onClick={logout}>
-                        <LogOutIcon data-icon="inline-start" />
-                        {t("logout-button")}
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button nativeButton={false} render={<Link href="/signin" />}>
-                  {t("login-button")}
-                </Button>
+          <nav
+            className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2"
+            aria-label={t("nav-aria-label")}
+          >
+            <Link
+              href="/presets"
+              aria-current={isPresets ? "page" : undefined}
+              className={clsx(
+                "inline-flex min-h-9 items-center rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+                isPresets
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
-            </div>
-          </div>
+            >
+              {t("nav-presets-button")}
+            </Link>
+
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="secondary"
+                      className="min-h-9"
+                      aria-busy={isProfileLoading || undefined}
+                    />
+                  }
+                >
+                  {profile?.username ??
+                    (isProfileLoading ? "…" : t("account-button"))}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      nativeButton={false}
+                      render={<Link href="/account" />}
+                    >
+                      <UserIcon data-icon="inline-start" />
+                      {t("account-button")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      nativeButton={false}
+                      render={<Link href={`/profile/${user.id}`} />}
+                    >
+                      <IdCardIcon data-icon="inline-start" />
+                      {t("profile-button")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <PaletteIcon data-icon="inline-start" />
+                        {t("theme-button")}
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuItem onClick={() => setTheme("dark")}>
+                          {t("theme-dark-button")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTheme("light")}>
+                          {t("theme-light-button")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTheme("system")}>
+                          {t("theme-system-button")}
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOutIcon data-icon="inline-start" />
+                      {t("logout-button")}
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="outline"
+                className="min-h-9"
+                nativeButton={false}
+                render={<Link href="/signin" />}
+              >
+                {t("login-button")}
+              </Button>
+            )}
+          </nav>
         </div>
       </Container>
-    </nav>
+    </header>
   );
 };
