@@ -5,16 +5,17 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useUser } from "../hooks/useUser";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useTranslation } from "next-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import LoadingDots from "../components/LoadingDots";
-import { Card } from "../components/Card";
-import { Input } from "../components/Input";
-import { Button } from "../components/Button";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { UserService } from "../services/userService";
 
 const SignIn = () => {
@@ -51,19 +52,9 @@ const SignIn = () => {
       await UserService.signin({ email, password });
     } catch ({ message }: any) {
       if (message === "Invalid login credentials") {
-        toast.error(t("submit-invalid-grant-error"), {
-          position: "bottom-center",
-          style: {
-            marginBottom: 50,
-          },
-        });
+        toast.error(t("submit-invalid-grant-error"));
       } else {
-        toast.error(message as string, {
-          position: "bottom-center",
-          style: {
-            marginBottom: 50,
-          },
-        });
+        toast.error(message as string);
       }
     }
   });
@@ -82,50 +73,65 @@ const SignIn = () => {
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <div className="flex flex-col justify-center items-center w-full h-screen">
-          <Card className="flex flex-col p-4 gap-8 max-w-md w-full">
-            <p className="text-2xl text-center pt-12 pb-4 font-bold text-gray-800 transition-colors duration-200 transform dark:text-white">
-              Cube Baby Presets
-            </p>
+        <div className="flex h-screen w-full flex-col items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardContent className="flex flex-col gap-8 pt-6">
+              <p className="pt-6 pb-4 text-center text-2xl font-bold text-foreground">
+                Cube Baby Presets
+              </p>
 
-            <form onSubmit={onSubmit} className="flex flex-col gap-4">
-              <Input
-                type="email"
-                label={`${t("email-field")} *`}
-                {...register("email")}
-                helperText={errors.email?.message}
-                error={!!errors.email}
-              />
-              <Input
-                type="password"
-                label={`${t("password-field")} *`}
-                {...register("password")}
-                helperText={errors.password?.message}
-                error={!!errors.password}
-                required
-              />
-              <Button className="mt-2" type="submit" disabled={!isValid}>
-                {isSubmitting ? <LoadingDots /> : t("signin-button")}
-              </Button>
-            </form>
+              <form onSubmit={onSubmit}>
+                <FieldGroup>
+                  <Field data-invalid={!!errors.email || undefined}>
+                    <FieldLabel htmlFor="email">{`${t("email-field")} *`}</FieldLabel>
+                    <Input
+                      id="email"
+                      type="email"
+                      aria-invalid={!!errors.email}
+                      {...register("email")}
+                    />
+                    {errors.email?.message && (
+                      <FieldError>{errors.email.message}</FieldError>
+                    )}
+                  </Field>
+                  <Field data-invalid={!!errors.password || undefined}>
+                    <FieldLabel htmlFor="password">{`${t("password-field")} *`}</FieldLabel>
+                    <Input
+                      id="password"
+                      type="password"
+                      aria-invalid={!!errors.password}
+                      required
+                      {...register("password")}
+                    />
+                    {errors.password?.message && (
+                      <FieldError>{errors.password.message}</FieldError>
+                    )}
+                  </Field>
+                  <Button className="mt-2 w-full" type="submit" disabled={!isValid}>
+                    {isSubmitting ? <Spinner /> : t("signin-button")}
+                  </Button>
+                </FieldGroup>
+              </form>
 
-            <span className="pt-1 text-center text-sm">
-              <span className="text-zinc-200">{t("no-account")}</span>
-              {` `}
-              <Link href="/signup">
-                <a className="text-accent-9 font-bold hover:underline cursor-pointer">
+              <span className="pt-1 text-center text-sm">
+                <span className="text-muted-foreground">{t("no-account")}</span>
+                {` `}
+                <Link
+                  href="/signup"
+                  className="font-bold text-primary hover:underline"
+                >
                   {t("no-account-link")}
-                </a>
-              </Link>
-            </span>
+                </Link>
+              </span>
+            </CardContent>
           </Card>
         </div>
       </>
     );
 
   return (
-    <div className="m-6">
-      <LoadingDots />
+    <div className="m-6 flex justify-center">
+      <Spinner />
     </div>
   );
 };

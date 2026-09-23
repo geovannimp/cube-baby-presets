@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { usePresetFormSchema } from "../hooks/usePresetFormSchema";
 import { Model } from "../services/modelService";
-import { Card } from "./Card";
+import { Card } from "@/components/ui/card";
 import { Pedal } from "./Pedal";
 
 interface KnobsFormProps {
