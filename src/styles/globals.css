@@ -130,4 +130,8 @@
     color: inherit;
     text-decoration: none;
   }
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 28%, transparent);
+    color: var(--foreground);
+  }
 }
