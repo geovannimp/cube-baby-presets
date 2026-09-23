@@ -3,7 +3,7 @@ import Head from "next/head";
 import { GetStaticProps } from "next/types";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { useUser } from "../hooks/useUser";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import toast from "react-hot-toast";
 import { useTranslation } from "next-i18next";

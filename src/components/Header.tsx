@@ -1,5 +1,5 @@
 import { Disclosure, Popover } from "@headlessui/react";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { useUser } from "../hooks/useUser";
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { useRouter } from "next/router";

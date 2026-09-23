@@ -1,4 +1,4 @@
-import { supabaseClient } from "@supabase/supabase-auth-helpers/nextjs";
+import { createClient } from "../utils/supabase/client";
 
 export type PresetCustomIR = { url: string; distance: number };
 export interface Preset {
@@ -36,78 +36,83 @@ export interface GetPresetsOptions {
   userId?: string;
 }
 
+const getSupabase = () => createClient();
+
 const getPreset = async (presetId: number): Promise<Preset> => {
-  const { error, data: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .select(PRESET_SELECT)
     .eq("id", presetId)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Preset not found");
 };
 
 const getPresets = async ({ userId }: GetPresetsOptions = {}): Promise<
   Preset[]
 > => {
-  let query = supabaseClient.from<Preset>("presets").select(PRESET_SELECT);
+  let query = getSupabase().from("presets").select(PRESET_SELECT);
   if (userId) {
     query = query.eq("user_id", userId);
   }
   const { error, data: presets } = await query;
   if (presets) {
-    return presets;
-  } else {
-    throw error;
+    return presets as unknown as Preset[];
   }
+
+  throw error ?? new Error("Failed to load presets");
 };
 
 const createPreset = async (presetToInset: Omit<Preset, "id" | "user">) => {
-  const { error, body: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .insert({
       ...presetToInset,
     })
+    .select(PRESET_SELECT)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Failed to create preset");
 };
 
 const updatePreset = async (presetToUpdate: Omit<Preset, "user">) => {
-  const { error, body: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .update({
       ...presetToUpdate,
     })
     .eq("id", presetToUpdate.id)
+    .select(PRESET_SELECT)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Failed to update preset");
 };
 
 const deletePreset = async (presetId: number) => {
-  const { error, data: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .delete()
     .eq("id", presetId)
+    .select(PRESET_SELECT)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Failed to delete preset");
 };
 
 export const PresetService = {
