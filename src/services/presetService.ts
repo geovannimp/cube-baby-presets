@@ -36,10 +36,10 @@ export interface GetPresetsOptions {
   userId?: string;
 }
 
-const supabase = createClient();
+const getSupabase = () => createClient();
 
 const getPreset = async (presetId: number): Promise<Preset> => {
-  const { error, data: preset } = await supabase
+  const { error, data: preset } = await getSupabase()
     .from("presets")
     .select(PRESET_SELECT)
     .eq("id", presetId)
@@ -55,7 +55,7 @@ const getPreset = async (presetId: number): Promise<Preset> => {
 const getPresets = async ({ userId }: GetPresetsOptions = {}): Promise<
   Preset[]
 > => {
-  let query = supabase.from("presets").select(PRESET_SELECT);
+  let query = getSupabase().from("presets").select(PRESET_SELECT);
   if (userId) {
     query = query.eq("user_id", userId);
   }
@@ -68,7 +68,7 @@ const getPresets = async ({ userId }: GetPresetsOptions = {}): Promise<
 };
 
 const createPreset = async (presetToInset: Omit<Preset, "id" | "user">) => {
-  const { error, data: preset } = await supabase
+  const { error, data: preset } = await getSupabase()
     .from("presets")
     .insert({
       ...presetToInset,
@@ -84,7 +84,7 @@ const createPreset = async (presetToInset: Omit<Preset, "id" | "user">) => {
 };
 
 const updatePreset = async (presetToUpdate: Omit<Preset, "user">) => {
-  const { error, data: preset } = await supabase
+  const { error, data: preset } = await getSupabase()
     .from("presets")
     .update({
       ...presetToUpdate,
@@ -101,7 +101,7 @@ const updatePreset = async (presetToUpdate: Omit<Preset, "user">) => {
 };
 
 const deletePreset = async (presetId: number) => {
-  const { error, data: preset } = await supabase
+  const { error, data: preset } = await getSupabase()
     .from("presets")
     .delete()
     .eq("id", presetId)

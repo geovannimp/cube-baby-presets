@@ -17,14 +17,12 @@ type CookieContext = {
 
 export function createPagesServerClient(context: CookieContext) {
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "public-anon-key",
     {
       cookies: {
         getAll() {
-          return parseCookieHeader(context.req.headers.cookie ?? "").map(
-            ({ name, value }) => ({ name, value: value ?? "" })
-          );
+          return parseCookieHeader(context.req.headers.cookie ?? "");
         },
         setAll(cookiesToSet, headers) {
           cookiesToSet.forEach(({ name, value, options }) =>

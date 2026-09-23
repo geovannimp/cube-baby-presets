@@ -6,7 +6,7 @@ export interface Profile {
   username: string;
 }
 
-const supabase = createClient();
+const getSupabase = () => createClient();
 
 const signin = async ({
   email,
@@ -15,6 +15,7 @@ const signin = async ({
   email: string;
   password: string;
 }): Promise<Profile> => {
+  const supabase = getSupabase();
   const { error, data } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -46,6 +47,7 @@ const signup = async ({
   email: string;
   password: string;
 }) => {
+  const supabase = getSupabase();
   const { error, data } = await supabase.auth.signUp({
     email,
     password,
@@ -66,6 +68,7 @@ const updateUserProfile = async (
   userId: string,
   { username }: Partial<Profile>
 ): Promise<Profile> => {
+  const supabase = getSupabase();
   const { error, data: profile } = await supabase
     .from("profiles")
     .update({ username })
@@ -81,6 +84,7 @@ const updateUserProfile = async (
 };
 
 const getProfile = async (userId: string) => {
+  const supabase = getSupabase();
   const { error, data: profile } = await supabase
     .from("profiles")
     .select()
@@ -95,6 +99,7 @@ const getProfile = async (userId: string) => {
 };
 
 const isUsernameAvailable = async (username: string) => {
+  const supabase = getSupabase();
   const { data: profiles } = await supabase
     .from("profiles")
     .select("username")
@@ -104,7 +109,7 @@ const isUsernameAvailable = async (username: string) => {
 };
 
 const logout = async () => {
-  const { error } = await supabase.auth.signOut();
+  const { error } = await getSupabase().auth.signOut();
 
   if (error) {
     throw error;
