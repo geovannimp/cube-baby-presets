@@ -2,15 +2,16 @@ import { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import { Header } from "../components/Header";
 import { Container } from "../components/Container";
 import { Button } from "../components/Button";
+import nextI18nextConfig from "../../next-i18next.config";
 
 const Home: NextPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("common");
 
   return (
     <>
@@ -46,6 +47,7 @@ const Home: NextPage = () => {
               width={400}
               height={400}
               className="w-full h-full max-w-md"
+              priority
             />
           </div>
         </div>
@@ -55,7 +57,11 @@ const Home: NextPage = () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-  props: await serverSideTranslations(locale!),
+  props: await serverSideTranslations(
+    locale!,
+    ["common"],
+    nextI18nextConfig
+  ),
 });
 
 export default Home;
