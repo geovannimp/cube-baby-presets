@@ -9,13 +9,14 @@ import { useUser } from "../hooks/useUser";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 import { UserService } from "../services/userService";
-import LoadingDots from "../components/LoadingDots";
-import { Input } from "../components/Input";
-import { Button } from "../components/Button";
-import { Card } from "../components/Card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 const SignUp = () => {
   const { t } = useTranslation("signup");
@@ -48,7 +49,7 @@ const SignUp = () => {
     .required()
     .refine((data) => data.password === data.confirmPassword, {
       message: t("password-confirmation-do-not-match"),
-      path: ["confirmPassword"], // path of error
+      path: ["confirmPassword"],
     });
 
   const {
@@ -67,19 +68,9 @@ const SignUp = () => {
         username,
         password,
       });
-      toast.success(t("submit-success-message"), {
-        position: "bottom-center",
-        style: {
-          marginBottom: 50,
-        },
-      });
+      toast.success(t("submit-success-message"));
     } catch ({ message }: any) {
-      toast.error(message as string, {
-        position: "bottom-center",
-        style: {
-          marginBottom: 50,
-        },
-      });
+      toast.error(message as string);
     }
   });
 
@@ -95,55 +86,80 @@ const SignUp = () => {
         <title>Cube Baby Presets - Sign Un</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="flex flex-col justify-center items-center w-full h-screen">
-        <Card className="flex flex-col p-4 gap-8 max-w-md w-full">
-          <p className="text-2xl text-center pt-12 pb-4 font-bold text-gray-800 transition-colors duration-200 transform dark:text-white">
-            Cube Baby Presets
-          </p>
+      <div className="flex h-screen w-full flex-col items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col gap-8 pt-6">
+            <p className="pt-6 pb-4 text-center text-2xl font-bold text-foreground">
+              Cube Baby Presets
+            </p>
 
-          <form onSubmit={handleSignup} className="flex flex-col gap-4">
-            <Input
-              label={`${t("username-field")} *`}
-              {...register("username")}
-              helperText={errors.username?.message}
-              error={!!errors.username}
-            />
-            <Input
-              label={`${t("email-field")} *`}
-              type="email"
-              {...register("email")}
-              helperText={errors.email?.message}
-              error={!!errors.email}
-              required
-            />
-            <Input
-              label={`${t("password-field")} *`}
-              type="password"
-              {...register("password")}
-              helperText={errors.password?.message}
-              error={!!errors.password}
-            />
-            <Input
-              label={`${t("confirm-password-field")} *`}
-              type="password"
-              {...register("confirmPassword")}
-              helperText={errors.confirmPassword?.message}
-              error={!!errors.confirmPassword}
-            />
-            <Button className="mt-2" disabled={!isValid} type="submit">
-              {isSubmitting ? <LoadingDots /> : t("signup-button")}
-            </Button>
-          </form>
+            <form onSubmit={handleSignup}>
+              <FieldGroup>
+                <Field data-invalid={!!errors.username || undefined}>
+                  <FieldLabel htmlFor="username">{`${t("username-field")} *`}</FieldLabel>
+                  <Input
+                    id="username"
+                    aria-invalid={!!errors.username}
+                    {...register("username")}
+                  />
+                  {errors.username?.message && (
+                    <FieldError>{errors.username.message}</FieldError>
+                  )}
+                </Field>
+                <Field data-invalid={!!errors.email || undefined}>
+                  <FieldLabel htmlFor="email">{`${t("email-field")} *`}</FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    aria-invalid={!!errors.email}
+                    required
+                    {...register("email")}
+                  />
+                  {errors.email?.message && (
+                    <FieldError>{errors.email.message}</FieldError>
+                  )}
+                </Field>
+                <Field data-invalid={!!errors.password || undefined}>
+                  <FieldLabel htmlFor="password">{`${t("password-field")} *`}</FieldLabel>
+                  <Input
+                    id="password"
+                    type="password"
+                    aria-invalid={!!errors.password}
+                    {...register("password")}
+                  />
+                  {errors.password?.message && (
+                    <FieldError>{errors.password.message}</FieldError>
+                  )}
+                </Field>
+                <Field data-invalid={!!errors.confirmPassword || undefined}>
+                  <FieldLabel htmlFor="confirmPassword">{`${t("confirm-password-field")} *`}</FieldLabel>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    aria-invalid={!!errors.confirmPassword}
+                    {...register("confirmPassword")}
+                  />
+                  {errors.confirmPassword?.message && (
+                    <FieldError>{errors.confirmPassword.message}</FieldError>
+                  )}
+                </Field>
+                <Button className="mt-2 w-full" disabled={!isValid} type="submit">
+                  {isSubmitting ? <Spinner /> : t("signup-button")}
+                </Button>
+              </FieldGroup>
+            </form>
 
-          <span className="pt-1 text-center text-sm">
-            <span className="text-zinc-200">{t("with-account")}</span>
-            {` `}
-            <Link href="/signin">
-              <a className="text-accent-9 font-bold hover:underline cursor-pointer">
+            <span className="pt-1 text-center text-sm">
+              <span className="text-muted-foreground">{t("with-account")}</span>
+              {` `}
+              <Link
+                href="/signin"
+                className="font-bold text-primary hover:underline"
+              >
                 {t("with-account-link")}
-              </a>
-            </Link>
-          </span>
+              </Link>
+            </span>
+          </CardContent>
         </Card>
       </div>
     </>

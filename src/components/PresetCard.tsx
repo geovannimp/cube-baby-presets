@@ -1,10 +1,16 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { useMemo } from "react";
+import { UserCircleIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Preset } from "../services/presetService";
-import { Button } from "./Button";
-import { UserCircleIcon } from "@heroicons/react/20/solid";
 
 interface PresetCardProps {
   preset: Preset;
@@ -35,41 +41,43 @@ export const PresetCard = ({ preset, modelName }: PresetCardProps) => {
   }, [preset.model_id]);
 
   return (
-    <div
-      key={preset.id}
-      className="flex flex-col justify-between max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 w-full"
-    >
-      <div className="px-6 pt-4 pb-3 flex flex-col justify-between h-full">
+    <Card className="mx-auto w-full max-w-sm overflow-hidden py-0">
+      <CardContent className="flex h-full flex-col justify-between px-6 pt-4 pb-3">
         <div className="flex flex-col">
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
+          <h1 className="text-xl font-semibold text-card-foreground">
             {preset.name}
           </h1>
 
-          <p className="my-2 text-sm text-gray-700 dark:text-gray-400 line-clamp-3">
+          <p className="my-2 line-clamp-3 text-sm text-muted-foreground">
             {preset.description}
           </p>
         </div>
 
-        <Link href={`/profile/${preset.user_id}`}>
-          <p className="flex items-center px-2 py-0.5 mt-2 cursor-pointer font-semibold self-start text-gray-100 transition-colors duration-300 transform rounded-md bg-zinc-600 dark:bg-slate-200 dark:text-slate-800 text-sm hover:bg-opacity-80">
-            <UserCircleIcon className="h-4 w-4 mr-1 inline-block" />{" "}
-            {preset.user.username}
-          </p>
+        <Link
+          href={`/profile/${preset.user_id}`}
+          className="mt-2 inline-flex items-center gap-1.5 self-start rounded-md bg-secondary px-2.5 py-1 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80"
+        >
+          <UserCircleIcon className="size-3.5 shrink-0" />
+          {preset.user.username}
         </Link>
-      </div>
+      </CardContent>
 
-      <div
-        className={clsx(
-          "flex items-center px-6 py-3 justify-between",
+      <CardFooter
+        className={cn(
+          "flex items-center justify-between px-6 py-3",
           modelColors?.background,
           modelColors?.text
         )}
       >
         <h1 className="text-lg font-semibold">{modelName}</h1>
-        <Link href={`/presets/${preset.id}`}>
-          <Button className="px-6">{t("open-preset-button")}</Button>
-        </Link>
-      </div>
-    </div>
+        <Button
+          className="px-6"
+          nativeButton={false}
+          render={<Link href={`/presets/${preset.id}`} />}
+        >
+          {t("open-preset-button")}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };

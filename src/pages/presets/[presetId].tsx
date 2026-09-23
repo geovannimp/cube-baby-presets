@@ -5,20 +5,28 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from "../../components/Button";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
 import { Container } from "../../components/Container";
 import { DeletePresetDialog } from "../../components/DeletePresetDialog";
 import { Header } from "../../components/Header";
-import { Input } from "../../components/Input";
 import { KnobsForm } from "../../components/KnobsForm";
-import LoadingDots from "../../components/LoadingDots";
-import { Select } from "../../components/Select";
-import { Textarea } from "../../components/Textarea";
 import { useModels } from "../../hooks/useModels";
 import nextI18nextConfig from "../../../next-i18next.config";
 import { usePresetFormSchema } from "../../hooks/usePresetFormSchema";
@@ -132,12 +140,7 @@ const NewPreset: NextPage = () => {
               : undefined,
           });
         }
-        toast.success(t("submit-success-message"), {
-          position: "bottom-center",
-          style: {
-            marginBottom: 50,
-          },
-        });
+        toast.success(t("submit-success-message"));
         router.replace("/account");
       }
     }
@@ -186,75 +189,125 @@ const NewPreset: NextPage = () => {
 
       <Container className="my-8">
         <FormProvider {...formMethods}>
-          <form onSubmit={onSubmit} className="flex gap-4 flex-col w-full">
+          <form onSubmit={onSubmit} className="flex w-full flex-col gap-4">
             {dialogMode !== "creating" && !preset ? (
-              <div className="flex flex-col justify-center items-center w-full">
-                <LoadingDots />
+              <div className="flex w-full flex-col items-center justify-center">
+                <Spinner className="size-8" />
               </div>
             ) : (
               <>
-                <p className="font-bold text-2xl">{title}</p>
-                <Input
-                  label={`${t("name-field")} *`}
-                  {...register("name")}
-                  helperText={errors.name?.message}
-                  error={!!errors.name}
-                  disabled={dialogMode === "viewing"}
-                />
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field }) => (
-                    <Textarea
-                      label={`${t("description-field")} *`}
-                      {...field}
-                      helperText={errors.description?.message}
-                      error={!!errors.description}
+                <p className="text-2xl font-bold">{title}</p>
+                <FieldGroup>
+                  <Field data-invalid={!!errors.name || undefined}>
+                    <FieldLabel htmlFor="name">{`${t("name-field")} *`}</FieldLabel>
+                    <Input
+                      id="name"
+                      aria-invalid={!!errors.name}
                       disabled={dialogMode === "viewing"}
+                      {...register("name")}
                     />
-                  )}
-                />
-                {models ? (
+                    {errors.name?.message && (
+                      <FieldError>{errors.name.message}</FieldError>
+                    )}
+                  </Field>
                   <Controller
-                    name="modelId"
+                    name="description"
                     control={control}
                     render={({ field }) => (
-                      <Select
-                        label={`${t("version-field")} *`}
-                        {...field}
-                        disabled={dialogMode === "viewing"}
-                        extractLabel={(model) => model.name}
-                        extractValue={(model) => model.id}
-                        options={models}
-                      />
+                      <Field data-invalid={!!errors.description || undefined}>
+                        <FieldLabel htmlFor="description">{`${t("description-field")} *`}</FieldLabel>
+                        <Textarea
+                          id="description"
+                          aria-invalid={!!errors.description}
+                          disabled={dialogMode === "viewing"}
+                          {...field}
+                        />
+                        {errors.description?.message && (
+                          <FieldError>{errors.description.message}</FieldError>
+                        )}
+                      </Field>
                     )}
                   />
-                ) : (
-                  <LoadingDots />
-                )}
+                  {models ? (
+                    <Controller
+                      name="modelId"
+                      control={control}
+                      render={({ field }) => (
+                        <Field data-invalid={!!errors.modelId || undefined}>
+                          <FieldLabel>{`${t("version-field")} *`}</FieldLabel>
+                          <Select
+                            value={field.value ?? null}
+                            onValueChange={field.onChange}
+                            disabled={dialogMode === "viewing"}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                {models.map((model) => (
+                                  <SelectItem key={model.id} value={model.id}>
+                                    {model.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                          {errors.modelId?.message && (
+                            <FieldError>{errors.modelId.message}</FieldError>
+                          )}
+                        </Field>
+                      )}
+                    />
+                  ) : (
+                    <div className="flex justify-center py-4">
+                      <Spinner className="size-8" />
+                    </div>
+                  )}
+                </FieldGroup>
                 {selectedModel && (
                   <>
                     <div className="flex flex-row gap-4">
-                      <Input
-                        containerClassName="w-full"
-                        label={`${t("custom-ir-field")}`}
-                        {...register("customIR")}
-                        helperText={errors.customIR?.message}
-                        error={!!errors.customIR}
-                        placeholder="https://"
-                        disabled={dialogMode === "viewing"}
-                      />
-                      <Input
-                        containerClassName="w-32"
-                        label={`${t("custom-ir-distance-field")}`}
-                        type={"number"}
-                        {...register("customIRDistance", {
-                          valueAsNumber: true,
-                        })}
-                        helperText={errors.customIRDistance?.message}
-                        error={!!errors.customIRDistance}
-                        disabled={dialogMode === "viewing"}
-                      />
+                      <Field
+                        className="w-full"
+                        data-invalid={!!errors.customIR || undefined}
+                      >
+                        <FieldLabel htmlFor="customIR">
+                          {t("custom-ir-field")}
+                        </FieldLabel>
+                        <Input
+                          id="customIR"
+                          aria-invalid={!!errors.customIR}
+                          placeholder="https://"
+                          disabled={dialogMode === "viewing"}
+                          {...register("customIR")}
+                        />
+                        {errors.customIR?.message && (
+                          <FieldError>{errors.customIR.message}</FieldError>
+                        )}
+                      </Field>
+                      <Field
+                        className="w-32"
+                        data-invalid={!!errors.customIRDistance || undefined}
+                      >
+                        <FieldLabel htmlFor="customIRDistance">
+                          {t("custom-ir-distance-field")}
+                        </FieldLabel>
+                        <Input
+                          id="customIRDistance"
+                          type="number"
+                          aria-invalid={!!errors.customIRDistance}
+                          disabled={dialogMode === "viewing"}
+                          {...register("customIRDistance", {
+                            valueAsNumber: true,
+                          })}
+                        />
+                        {errors.customIRDistance?.message && (
+                          <FieldError>
+                            {errors.customIRDistance.message}
+                          </FieldError>
+                        )}
+                      </Field>
                     </div>
                     <KnobsForm
                       model={selectedModel}
@@ -263,14 +316,14 @@ const NewPreset: NextPage = () => {
                     />
                     {(dialogMode === "creating" ||
                       dialogMode === "editing") && (
-                      <div className="flex flex-col my-4 mb-8 justify-between sm:flex-row-reverse">
+                      <div className="my-4 mb-8 flex flex-col justify-between sm:flex-row-reverse">
                         <Button
                           type="submit"
-                          className="w-full mb-4 sm:w-32 sm:mb-0"
+                          className="mb-4 w-full sm:mb-0 sm:w-32"
                           disabled={!isValid}
                         >
                           {isSubmitting ? (
-                            <LoadingDots />
+                            <Spinner />
                           ) : dialogMode === "creating" ? (
                             t("preset-submit-button", { context: "creating" })
                           ) : (
@@ -279,8 +332,10 @@ const NewPreset: NextPage = () => {
                         </Button>
                         {dialogMode === "editing" && (
                           <Button
+                            type="button"
+                            variant="destructive"
                             onClick={showDeleteDialog}
-                            className="w-full sm:w-32 bg-red-700 hover:bg-red-500"
+                            className="w-full sm:w-32"
                           >
                             {t("preset-delete-button")}
                           </Button>

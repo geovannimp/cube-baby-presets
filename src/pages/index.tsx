@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
+import { Button } from "@/components/ui/button";
 import { Header } from "../components/Header";
 import { Container } from "../components/Container";
-import { Button } from "../components/Button";
 import nextI18nextConfig from "../../next-i18next.config";
 
 const Home: NextPage = () => {
@@ -22,31 +22,33 @@ const Home: NextPage = () => {
 
       <Header />
 
-      <Container className="gap-4 py-8 h-[80vh]">
-        <div className="items-center lg:flex gap-12 justify-center h-full">
+      <Container className="h-[80vh] gap-4 py-8">
+        <div className="flex h-full items-center justify-center gap-12 lg:flex">
           <div className="w-full lg:w-1/2">
             <div className="lg:max-w-lg">
-              <h1 className="text-2xl text-center font-semibold text-gray-800 uppercase dark:text-white lg:text-4xl lg:text-left">
+              <h1 className="text-center text-2xl font-semibold uppercase text-foreground lg:text-left lg:text-4xl">
                 Cube Baby Presets
               </h1>
-              <p className="mt-2 text-center text-gray-600 dark:text-gray-400 lg:text-left">
+              <p className="mt-2 text-center text-muted-foreground lg:text-left">
                 {t("project-description")}
               </p>
-              <Link href="/presets">
-                <Button className="w-full py-2 px-6 mt-8 text-base font-medium text-white lg:w-auto">
-                  {t("go-to-presets-button")}
-                </Button>
-              </Link>
+              <Button
+                className="mt-8 w-full px-6 lg:w-auto"
+                nativeButton={false}
+                render={<Link href="/presets" />}
+              >
+                {t("go-to-presets-button")}
+              </Button>
             </div>
           </div>
 
-          <div className="flex items-center justify-center w-full mt-12 lg:mt-0 lg:w-1/2">
+          <div className="mt-12 flex w-full items-center justify-center lg:mt-0 lg:w-1/2">
             <Image
               alt="music compose"
               src="/undraw_compose_music_re_wpiw.svg"
               width={400}
               height={400}
-              className="w-full h-full max-w-md"
+              className="h-full w-full max-w-md"
               priority
             />
           </div>

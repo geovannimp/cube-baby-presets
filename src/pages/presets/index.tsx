@@ -10,14 +10,23 @@ import { usePresets } from "../../hooks/usePresets";
 import { useModels } from "../../hooks/useModels";
 import { Header } from "../../components/Header";
 import { Container } from "../../components/Container";
-import { Button } from "../../components/Button";
-import LoadingDots from "../../components/LoadingDots";
 import { PresetCard } from "../../components/PresetCard";
-import { Input } from "../../components/Input";
 import { ChangeEventHandler, useMemo } from "react";
-import { Select } from "../../components/Select";
 import { Preset } from "../../services/presetService";
 import { usePresetsFilters } from "../../hooks/usePresetsFilters";
+import { Button } from "@/components/ui/button";
+import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 
 const filterWithSearch = (search: string) => (presets?: Preset[]) =>
   search
@@ -65,11 +74,13 @@ const Presets: NextPage = () => {
   const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (e) =>
     setFilter((current) => ({ ...current, search: e.target.value }));
 
-  const handleModelChange = (modelId: string) =>
-    setFilter((current) => ({ ...current, modelId }));
+  const handleModelChange = (modelId: string | null) => {
+    if (modelId) setFilter((current) => ({ ...current, modelId }));
+  };
 
-  const handleUserChange = (userId: string) =>
-    setFilter((current) => ({ ...current, userId }));
+  const handleUserChange = (userId: string | null) => {
+    if (userId) setFilter((current) => ({ ...current, userId }));
+  };
 
   return (
     <>
@@ -80,54 +91,75 @@ const Presets: NextPage = () => {
 
       <Header />
 
-      <Container className="gap-4 my-8">
-        <div className="flex flex-row justify-between items-center">
-          <p className="font-bold text-2xl">{t("presets-list-title")}</p>
+      <Container className="my-8 gap-4">
+        <div className="flex flex-row items-center justify-between">
+          <p className="text-2xl font-bold">{t("presets-list-title")}</p>
           {user && (
-            <Link href="/presets/new">
-              <Button>
-                <span>{t("presets-list-button")}</span>
-              </Button>
-            </Link>
+            <Button nativeButton={false} render={<Link href="/presets/new" />}>
+              {t("presets-list-button")}
+            </Button>
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          <Input
-            label={t("presets-list-search-filter")}
-            onChange={handleSearchChange}
-            placeholder={t("presets-list-search-filter-placeholder")}
-          />
-          <Select
-            className="w-full md:w-1/4 z-20"
-            label={t("presets-list-model-filter")}
-            options={[
-              { name: t("presets-list-model-filter-all"), id: "all" },
-              ...(models ?? []),
-            ]}
-            extractLabel={(model) => model.name}
-            extractValue={(model) => model.id}
-            value={filter.modelId}
-            onChange={handleModelChange}
-          />
-          <Select
-            className="w-full md:w-1/4"
-            label={t("presets-list-user-filter")}
-            options={[
-              { username: t("presets-list-user-filter-all"), id: "all" },
-              ...(users ?? []),
-            ]}
-            extractLabel={(user) => user.username}
-            extractValue={(user) => user.id}
-            value={filter.userId}
-            onChange={handleUserChange}
-          />
+        <div className="flex flex-col gap-4 md:flex-row">
+          <Field className="flex-1">
+            <FieldLabel htmlFor="presets-search">
+              {t("presets-list-search-filter")}
+            </FieldLabel>
+            <Input
+              id="presets-search"
+              onChange={handleSearchChange}
+              placeholder={t("presets-list-search-filter-placeholder")}
+            />
+          </Field>
+          <Field className="w-full md:w-1/4">
+            <FieldLabel>{t("presets-list-model-filter")}</FieldLabel>
+            <Select value={filter.modelId} onValueChange={handleModelChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">
+                    {t("presets-list-model-filter-all")}
+                  </SelectItem>
+                  {models?.map((model) => (
+                    <SelectItem key={model.id} value={model.id}>
+                      {model.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field className="w-full md:w-1/4">
+            <FieldLabel>{t("presets-list-user-filter")}</FieldLabel>
+            <Select value={filter.userId} onValueChange={handleUserChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">
+                    {t("presets-list-user-filter-all")}
+                  </SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.username}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
         </div>
 
         {isLoading ? (
-          <LoadingDots />
+          <div className="flex justify-center py-12">
+            <Spinner className="size-8" />
+          </div>
         ) : filteredPresets?.length ? (
-          <div className="mt-4 grid gap-6 md:grid-cols-3 grid-cols-1">
+          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
             {filteredPresets?.map((preset) => (
               <PresetCard
                 key={preset.id}
@@ -139,9 +171,10 @@ const Presets: NextPage = () => {
             ))}
           </div>
         ) : (
-          <p className="text-center font-bold text-lg my-6 py-24 border-dashed border-2 rounded w-full">
-            {t("presets-list-empty")}
-          </p>
+          <Empty className="my-6 py-24">
+            <EmptyTitle>{t("presets-list-empty")}</EmptyTitle>
+            <EmptyDescription />
+          </Empty>
         )}
       </Container>
     </>
