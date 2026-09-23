@@ -1,6 +1,4 @@
 import type { AppProps } from "next/app";
-import { GeistSans } from "geist/font/sans";
-import { Roboto } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { appWithTranslation } from "next-i18next";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -12,14 +10,8 @@ import nextI18NextConfig from "../../next-i18next.config";
 import { queryClient } from "../utils/queryClient";
 import { AuthProvider } from "../hooks/useUser";
 import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
 
 import "../styles/globals.css";
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  variable: "--font-roboto",
-});
 
 NProgress.configure({ showSpinner: false });
 
@@ -32,14 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider attribute="class">
-          <div
-            className={cn(
-              GeistSans.variable,
-              roboto.variable,
-              GeistSans.className,
-              "flex min-h-screen w-full flex-col items-center bg-background text-foreground"
-            )}
-          >
+          <div className="flex min-h-screen w-full flex-col items-center bg-background text-foreground">
             <Component {...pageProps} />
             <Toaster position="bottom-center" />
           </div>
