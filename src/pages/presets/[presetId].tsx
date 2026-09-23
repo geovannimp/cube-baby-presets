@@ -1,4 +1,4 @@
-import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { useUser } from "../../hooks/useUser";
 import type { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";

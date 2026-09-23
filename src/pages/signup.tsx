@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { GetStaticProps } from "next";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { useUser } from "../hooks/useUser";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";

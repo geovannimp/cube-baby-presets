@@ -1,9 +1,7 @@
 import { useMemo } from "react";
-import { GetStaticProps, NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { withPageAuth } from "@supabase/supabase-auth-helpers/nextjs";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 
@@ -15,6 +13,8 @@ import LoadingDots from "../components/LoadingDots";
 import { useModels } from "../hooks/useModels";
 import { PresetCard } from "../components/PresetCard";
 import nextI18nextConfig from "../../next-i18next.config";
+import { useUser } from "../hooks/useUser";
+import { createPagesServerClient } from "../utils/supabase/pages";
 
 const Account: NextPage = () => {
   const { t } = useTranslation("account");
@@ -68,19 +68,30 @@ const Account: NextPage = () => {
   );
 };
 
-export const getServerSideProps = withPageAuth({
-  redirectTo: "/signin",
-  getServerSideProps: async ({ locale }) => {
-    const translations = await serverSideTranslations(
-      locale!,
-      ["common", "account"],
-      nextI18nextConfig
-    );
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const supabase = createPagesServerClient(ctx);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
+  if (!user) {
     return {
-      props: translations,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
+      },
     };
-  },
-});
+  }
+
+  const translations = await serverSideTranslations(
+    ctx.locale!,
+    ["common", "account"],
+    nextI18nextConfig
+  );
+
+  return {
+    props: translations,
+  };
+};
 
 export default Account;

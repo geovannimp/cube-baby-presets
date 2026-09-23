@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
+import { useUser } from "../../hooks/useUser";
 import { chain, unique } from "radash";
 
 import { usePresets } from "../../hooks/usePresets";
