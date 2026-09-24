@@ -5,6 +5,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import { useUser } from "../../hooks/useUser";
 import { chain, unique } from "radash";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 import { usePresets } from "../../hooks/usePresets";
 import { useModels } from "../../hooks/useModels";
@@ -27,6 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+
+const PAGE_SIZE = 48;
 
 const filterWithSearch = (search: string) => (presets?: Preset[]) =>
   search
@@ -52,6 +56,10 @@ const Presets: NextPage = () => {
   const { data: models, isLoading: isLoadingModels } = useModels();
 
   const { filter, setFilter } = usePresetsFilters();
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true })
+  );
 
   const isLoading = isLoadingPresets || isLoadingModels;
 
@@ -71,15 +79,39 @@ const Presets: NextPage = () => {
     [filter, presets]
   );
 
-  const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (e) =>
+  const totalPages = Math.max(
+    1,
+    Math.ceil((filteredPresets?.length ?? 0) / PAGE_SIZE)
+  );
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+
+  const pagedPresets = useMemo(() => {
+    if (!filteredPresets?.length) return [];
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredPresets.slice(start, start + PAGE_SIZE);
+  }, [filteredPresets, currentPage]);
+
+  const resetPage = () => {
+    void setPage(null);
+  };
+
+  const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setFilter((current) => ({ ...current, search: e.target.value }));
+    resetPage();
+  };
 
   const handleModelChange = (modelId: string | null) => {
-    if (modelId) setFilter((current) => ({ ...current, modelId }));
+    if (modelId) {
+      setFilter((current) => ({ ...current, modelId }));
+      resetPage();
+    }
   };
 
   const handleUserChange = (userId: string | null) => {
-    if (userId) setFilter((current) => ({ ...current, userId }));
+    if (userId) {
+      setFilter((current) => ({ ...current, userId }));
+      resetPage();
+    }
   };
 
   return (
@@ -110,6 +142,7 @@ const Presets: NextPage = () => {
               id="presets-search"
               onChange={handleSearchChange}
               placeholder={t("presets-list-search-filter-placeholder")}
+              defaultValue={filter.search}
             />
           </Field>
           <Field className="w-full md:w-1/4">
@@ -159,17 +192,53 @@ const Presets: NextPage = () => {
             <Spinner className="size-8" />
           </div>
         ) : filteredPresets?.length ? (
-          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {filteredPresets?.map((preset) => (
-              <PresetCard
-                key={preset.id}
-                preset={preset}
-                modelName={
-                  models?.find((model) => model.id === preset.model_id)?.name
-                }
-              />
-            ))}
-          </div>
+          <>
+            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {pagedPresets.map((preset) => (
+                <PresetCard
+                  key={preset.id}
+                  preset={preset}
+                  modelName={
+                    models?.find((model) => model.id === preset.model_id)?.name
+                  }
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 ? (
+              <div className="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+                <p className="text-sm text-muted-foreground">
+                  {t("presets-list-pagination-status", {
+                    page: currentPage,
+                    totalPages,
+                    total: filteredPresets.length,
+                  })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    className="min-h-9"
+                    disabled={currentPage <= 1}
+                    onClick={() =>
+                      void setPage(currentPage - 1 <= 1 ? null : currentPage - 1)
+                    }
+                  >
+                    <ChevronLeftIcon data-icon="inline-start" />
+                    {t("presets-list-pagination-previous")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="min-h-9"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => void setPage(currentPage + 1)}
+                  >
+                    {t("presets-list-pagination-next")}
+                    <ChevronRightIcon data-icon="inline-end" />
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </>
         ) : (
           <Empty className="my-6 py-24">
             <EmptyTitle>{t("presets-list-empty")}</EmptyTitle>
