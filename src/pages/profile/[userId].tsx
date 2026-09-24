@@ -1,11 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { UserCircleIcon } from "lucide-react";
-import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 import { Header } from "../../components/Header";
 import { Container } from "../../components/Container";
@@ -21,17 +21,11 @@ const Profile: NextPage = () => {
   const router = useRouter();
   const { userId } = router.query;
   const resolvedUserId = typeof userId === "string" ? userId : undefined;
-
-  const [{ page, asOf }, setQuery] = useQueryStates({
-    page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
-    asOf: parseAsString.withOptions({ clearOnDefault: true }),
-  });
-
-  useEffect(() => {
-    if (!asOf) {
-      void setQuery({ asOf: new Date().toISOString() });
-    }
-  }, [asOf, setQuery]);
+  const [asOf] = useState(() => new Date().toISOString());
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true })
+  );
 
   const options = useMemo(
     () =>
@@ -40,19 +34,19 @@ const Profile: NextPage = () => {
             userId: resolvedUserId,
             page,
             pageSize: DEFAULT_PRESETS_PAGE_SIZE,
-            asOf: asOf ?? undefined,
+            asOf,
           }
         : undefined,
     [resolvedUserId, page, asOf]
   );
 
   const { data, isLoading: isLoadingPresets } = usePresets(options, {
-    enabled: Boolean(resolvedUserId && asOf),
+    enabled: Boolean(resolvedUserId),
   });
   const { data: models, isLoading: isLoadingModels } = useModels();
   const { data: profile } = useProfile(resolvedUserId);
 
-  const isLoading = isLoadingModels || isLoadingPresets || !asOf;
+  const isLoading = isLoadingModels || isLoadingPresets;
 
   return (
     <>
@@ -84,7 +78,7 @@ const Profile: NextPage = () => {
           totalCount={data?.totalCount ?? 0}
           emptyTitle={t("presets-list-empty")}
           onPageChange={(nextPage) =>
-            void setQuery({ page: nextPage <= 1 ? null : nextPage })
+            void setPage(nextPage <= 1 ? null : nextPage)
           }
         />
       </Container>

@@ -10,7 +10,7 @@ import {
   parseAsString,
   useQueryStates,
 } from "nuqs";
-import { ChangeEventHandler, useEffect, useMemo } from "react";
+import { ChangeEventHandler, useMemo, useState } from "react";
 
 import { usePresets } from "../../hooks/usePresets";
 import { usePresetAuthors } from "../../hooks/usePresetAuthors";
@@ -36,8 +36,9 @@ const Presets: NextPage = () => {
   const { user } = useUser();
   const { data: models, isLoading: isLoadingModels } = useModels();
   const { data: authors, isLoading: isLoadingAuthors } = usePresetAuthors();
+  const [asOf, setAsOf] = useState(() => new Date().toISOString());
 
-  const [{ search, modelId, userId, page, asOf }, setQuery] = useQueryStates({
+  const [{ search, modelId, userId, page }, setQuery] = useQueryStates({
     search: parseAsString.withDefault("").withOptions({
       clearOnDefault: true,
       limitUrlUpdates: debounce(300),
@@ -49,14 +50,7 @@ const Presets: NextPage = () => {
       clearOnDefault: true,
     }),
     page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
-    asOf: parseAsString.withOptions({ clearOnDefault: true }),
   });
-
-  useEffect(() => {
-    if (!asOf) {
-      void setQuery({ asOf: new Date().toISOString() });
-    }
-  }, [asOf, setQuery]);
 
   const presetsQuery = useMemo(
     () => ({
@@ -65,14 +59,12 @@ const Presets: NextPage = () => {
       userId: userId === "all" ? undefined : userId,
       page,
       pageSize: DEFAULT_PRESETS_PAGE_SIZE,
-      asOf: asOf ?? undefined,
+      asOf,
     }),
     [search, modelId, userId, page, asOf]
   );
 
-  const { data, isLoading: isLoadingPresets } = usePresets(presetsQuery, {
-    enabled: Boolean(asOf),
-  });
+  const { data, isLoading: isLoadingPresets } = usePresets(presetsQuery);
 
   const isLoading = isLoadingPresets || isLoadingModels || isLoadingAuthors;
 
@@ -99,28 +91,28 @@ const Presets: NextPage = () => {
   );
 
   const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    setAsOf(new Date().toISOString());
     void setQuery({
       search: e.target.value || null,
       page: null,
-      asOf: new Date().toISOString(),
     });
   };
 
   const handleModelChange = (nextModelId: string | null) => {
     if (!nextModelId) return;
+    setAsOf(new Date().toISOString());
     void setQuery({
       modelId: nextModelId === "all" ? null : nextModelId,
       page: null,
-      asOf: new Date().toISOString(),
     });
   };
 
   const handleUserChange = (nextUserId: string | null) => {
     if (!nextUserId) return;
+    setAsOf(new Date().toISOString());
     void setQuery({
       userId: nextUserId === "all" ? null : nextUserId,
       page: null,
-      asOf: new Date().toISOString(),
     });
   };
 
@@ -208,7 +200,7 @@ const Presets: NextPage = () => {
         <PresetsList
           presets={data?.presets ?? []}
           models={models}
-          isLoading={isLoading || !asOf}
+          isLoading={isLoading}
           page={page}
           pageSize={DEFAULT_PRESETS_PAGE_SIZE}
           totalCount={data?.totalCount ?? 0}

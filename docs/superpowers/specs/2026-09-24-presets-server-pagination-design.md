@@ -59,21 +59,22 @@ Renders: spinner | empty | grid of `PresetCard` + pagination chrome (prev/next +
 
 ### `/presets`
 
-- `nuqs`: `search`, `modelId`, `userId`, `page`, `asOf`
-- On first mount if `asOf` missing: set `asOf = new Date().toISOString()`
-- On filter change: reset `page` to default, set fresh `asOf`
+- `nuqs`: `search`, `modelId`, `userId`, `page`
+- On mount: `asOf = new Date().toISOString()` in component state (not URL)
+- On filter change: reset `page` to default, set fresh `asOf` in state
 - Pass query options into `usePresets`; render filters locally; pass results into `PresetsList`
 
 ### Account / profile
 
-- `nuqs`: `page`, `asOf` (same snapshot rules)
+- `nuqs`: `page` only
+- `asOf` in component state (same snapshot rules; refreshed only on remount)
 - Lock `userId` from auth / route
 - No search/model/user filters in v1
 - Use `PresetsList`
 
 ### Home
 
-- `usePresets({ page: 1, pageSize: 3, asOf })` with a mount-time `asOf` (not required in URL)
+- `usePresets({ page: 1, pageSize: 3, asOf })` with mount-time `asOf` in state (not in URL)
 - Keep current hero card layout + “See more”; do not use `PresetsList` (no pagination UI)
 
 ## Out of scope
@@ -86,7 +87,7 @@ Renders: spinner | empty | grid of `PresetCard` + pagination chrome (prev/next +
 ## Success criteria
 
 - Changing filters/page hits Supabase with matching filters + range
-- Reload with `?page=&asOf=` keeps the same window
+- Reload with `?page=` keeps pagination; `asOf` is session state only
 - Home shows at most 3 presets from the server query
 - Account/profile paginate at 48/page via `PresetsList`
 - Typecheck passes
