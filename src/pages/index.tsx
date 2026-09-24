@@ -1,7 +1,7 @@
 import { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useState } from "react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
@@ -17,22 +17,16 @@ import nextI18nextConfig from "../../next-i18next.config";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common");
-  const { data: presets, isLoading: isLoadingPresets } = usePresets();
+  const [asOf] = useState(() => new Date().toISOString());
+  const { data, isLoading: isLoadingPresets } = usePresets({
+    page: 1,
+    pageSize: 3,
+    asOf,
+  });
   const { data: models, isLoading: isLoadingModels } = useModels();
 
   const isLoading = isLoadingPresets || isLoadingModels;
-
-  const latestPresets = useMemo(() => {
-    if (!presets?.length) return [];
-
-    return [...presets]
-      .sort((a, b) => {
-        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return bTime - aTime;
-      })
-      .slice(0, 3);
-  }, [presets]);
+  const latestPresets = data?.presets ?? [];
 
   return (
     <>

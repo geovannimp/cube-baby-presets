@@ -1,30 +1,53 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
-import { Spinner } from "@/components/ui/spinner";
 import { Header } from "../components/Header";
 import { Container } from "../components/Container";
+import { PresetsList } from "../components/PresetsList";
 import { usePresets } from "../hooks/usePresets";
 import { useModels } from "../hooks/useModels";
-import { PresetCard } from "../components/PresetCard";
 import nextI18nextConfig from "../../next-i18next.config";
 import { useUser } from "../hooks/useUser";
 import { createPagesServerClient } from "../utils/supabase/pages";
+import { DEFAULT_PRESETS_PAGE_SIZE } from "../services/presetService";
 
 const Account: NextPage = () => {
   const { t } = useTranslation("account");
   const { user } = useUser();
-  const options = useMemo(() => ({ userId: user?.id }), [user?.id]);
-  const { data: presets, isLoading: isLoadingPresets } = usePresets(options);
   const { data: models, isLoading: isLoadingModels } = useModels();
 
-  const isLoading = isLoadingModels || isLoadingPresets;
+  const [{ page, asOf }, setQuery] = useQueryStates({
+    page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
+    asOf: parseAsString.withOptions({ clearOnDefault: true }),
+  });
+
+  useEffect(() => {
+    if (!asOf) {
+      void setQuery({ asOf: new Date().toISOString() });
+    }
+  }, [asOf, setQuery]);
+
+  const options = useMemo(
+    () => ({
+      userId: user?.id,
+      page,
+      pageSize: DEFAULT_PRESETS_PAGE_SIZE,
+      asOf: asOf ?? undefined,
+    }),
+    [user?.id, page, asOf]
+  );
+
+  const { data, isLoading: isLoadingPresets } = usePresets(options, {
+    enabled: Boolean(user?.id && asOf),
+  });
+
+  const isLoading = isLoadingModels || isLoadingPresets || !asOf;
 
   return (
     <>
@@ -43,28 +66,18 @@ const Account: NextPage = () => {
           </Button>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Spinner className="size-8" />
-          </div>
-        ) : presets?.length ? (
-          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {presets?.map((preset) => (
-              <PresetCard
-                key={preset.id}
-                preset={preset}
-                modelName={
-                  models?.find((model) => model.id === preset.model_id)?.name
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <Empty className="my-6 py-24">
-            <EmptyTitle>{t("presets-list-empty")}</EmptyTitle>
-            <EmptyDescription />
-          </Empty>
-        )}
+        <PresetsList
+          presets={data?.presets ?? []}
+          models={models}
+          isLoading={isLoading}
+          page={page}
+          pageSize={DEFAULT_PRESETS_PAGE_SIZE}
+          totalCount={data?.totalCount ?? 0}
+          emptyTitle={t("presets-list-empty")}
+          onPageChange={(nextPage) =>
+            void setQuery({ page: nextPage <= 1 ? null : nextPage })
+          }
+        />
       </Container>
     </>
   );
@@ -87,7 +100,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const translations = await serverSideTranslations(
     ctx.locale!,
-    ["common", "account"],
+    ["common", "account", "presets"],
     nextI18nextConfig
   );
 
