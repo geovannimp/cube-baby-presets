@@ -4,8 +4,13 @@ import Link from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import { useUser } from "../../hooks/useUser";
-import { chain, unique } from "radash";
-import { parseAsInteger, useQueryState } from "nuqs";
+import { chain } from "radash";
+import {
+  debounce,
+  parseAsInteger,
+  parseAsString,
+  useQueryStates,
+} from "nuqs";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 import { usePresets } from "../../hooks/usePresets";
@@ -15,7 +20,6 @@ import { Container } from "../../components/Container";
 import { PresetCard } from "../../components/PresetCard";
 import { ChangeEventHandler, useMemo } from "react";
 import { Preset } from "../../services/presetService";
-import { usePresetsFilters } from "../../hooks/usePresetsFilters";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -55,28 +59,69 @@ const Presets: NextPage = () => {
   const { data: presets, isLoading: isLoadingPresets } = usePresets();
   const { data: models, isLoading: isLoadingModels } = useModels();
 
-  const { filter, setFilter } = usePresetsFilters();
-  const [page, setPage] = useQueryState(
-    "page",
-    parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true })
-  );
+  const [{ search, modelId, userId, page }, setQuery] = useQueryStates({
+    search: parseAsString.withDefault("").withOptions({
+      clearOnDefault: true,
+      limitUrlUpdates: debounce(300),
+    }),
+    modelId: parseAsString.withDefault("all").withOptions({
+      clearOnDefault: true,
+    }),
+    userId: parseAsString.withDefault("all").withOptions({
+      clearOnDefault: true,
+    }),
+    page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
+  });
 
   const isLoading = isLoadingPresets || isLoadingModels;
 
-  const users = useMemo(
-    () =>
-      unique(presets?.map((preset) => preset.user) ?? [], (user) => user.id),
-    [presets]
+  const users = useMemo(() => {
+    const byId = new Map<string, { id: string; username: string }>();
+
+    for (const preset of presets ?? []) {
+      if (!preset.user_id || byId.has(preset.user_id)) continue;
+
+      const profile = Array.isArray(preset.user) ? preset.user[0] : preset.user;
+
+      byId.set(preset.user_id, {
+        id: preset.user_id,
+        username: profile?.username?.trim() || preset.user_id,
+      });
+    }
+
+    return [...byId.values()];
+  }, [presets]);
+
+  const modelSelectItems = useMemo(
+    () => [
+      { value: "all", label: t("presets-list-model-filter-all") },
+      ...(models?.map((model) => ({
+        value: model.id,
+        label: model.name,
+      })) ?? []),
+    ],
+    [models, t]
+  );
+
+  const userSelectItems = useMemo(
+    () => [
+      { value: "all", label: t("presets-list-user-filter-all") },
+      ...users.map((user) => ({
+        value: user.id,
+        label: user.username,
+      })),
+    ],
+    [users, t]
   );
 
   const filteredPresets = useMemo(
     () =>
       chain(
-        filterWithSearch(filter.search),
-        filterWithModel(filter.modelId),
-        filterWithUser(filter.userId)
+        filterWithSearch(search),
+        filterWithModel(modelId),
+        filterWithUser(userId)
       )(presets) as Preset[] | undefined,
-    [filter, presets]
+    [search, modelId, userId, presets]
   );
 
   const totalPages = Math.max(
@@ -91,27 +136,27 @@ const Presets: NextPage = () => {
     return filteredPresets.slice(start, start + PAGE_SIZE);
   }, [filteredPresets, currentPage]);
 
-  const resetPage = () => {
-    void setPage(null);
-  };
-
   const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setFilter((current) => ({ ...current, search: e.target.value }));
-    resetPage();
+    void setQuery({
+      search: e.target.value || null,
+      page: null,
+    });
   };
 
-  const handleModelChange = (modelId: string | null) => {
-    if (modelId) {
-      setFilter((current) => ({ ...current, modelId }));
-      resetPage();
-    }
+  const handleModelChange = (nextModelId: string | null) => {
+    if (!nextModelId) return;
+    void setQuery({
+      modelId: nextModelId === "all" ? null : nextModelId,
+      page: null,
+    });
   };
 
-  const handleUserChange = (userId: string | null) => {
-    if (userId) {
-      setFilter((current) => ({ ...current, userId }));
-      resetPage();
-    }
+  const handleUserChange = (nextUserId: string | null) => {
+    if (!nextUserId) return;
+    void setQuery({
+      userId: nextUserId === "all" ? null : nextUserId,
+      page: null,
+    });
   };
 
   return (
@@ -140,14 +185,18 @@ const Presets: NextPage = () => {
             </FieldLabel>
             <Input
               id="presets-search"
+              value={search}
               onChange={handleSearchChange}
               placeholder={t("presets-list-search-filter-placeholder")}
-              defaultValue={filter.search}
             />
           </Field>
           <Field className="w-full md:w-1/4">
             <FieldLabel>{t("presets-list-model-filter")}</FieldLabel>
-            <Select value={filter.modelId} onValueChange={handleModelChange}>
+            <Select
+              items={modelSelectItems}
+              value={modelId}
+              onValueChange={handleModelChange}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -167,7 +216,11 @@ const Presets: NextPage = () => {
           </Field>
           <Field className="w-full md:w-1/4">
             <FieldLabel>{t("presets-list-user-filter")}</FieldLabel>
-            <Select value={filter.userId} onValueChange={handleUserChange}>
+            <Select
+              items={userSelectItems}
+              value={userId}
+              onValueChange={handleUserChange}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -220,7 +273,10 @@ const Presets: NextPage = () => {
                     className="min-h-9"
                     disabled={currentPage <= 1}
                     onClick={() =>
-                      void setPage(currentPage - 1 <= 1 ? null : currentPage - 1)
+                      void setQuery({
+                        page:
+                          currentPage - 1 <= 1 ? null : currentPage - 1,
+                      })
                     }
                   >
                     <ChevronLeftIcon data-icon="inline-start" />
@@ -230,7 +286,7 @@ const Presets: NextPage = () => {
                     variant="outline"
                     className="min-h-9"
                     disabled={currentPage >= totalPages}
-                    onClick={() => void setPage(currentPage + 1)}
+                    onClick={() => void setQuery({ page: currentPage + 1 })}
                   >
                     {t("presets-list-pagination-next")}
                     <ChevronRightIcon data-icon="inline-end" />
