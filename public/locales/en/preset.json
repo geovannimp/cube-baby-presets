@@ -5,6 +5,7 @@
   "delete-preset-dialog-confirm-button": "Confirm",
   "name-field-required-error": "Name is required",
   "description-field-required-error": "Description is required",
+  "version-field-required-error": "Version is required",
   "preset-invalid-custom-ir": "Custom IR must be a valid url",
   "preset-invalid-custom-ir-distance": "Custom IR distance must be between 0 and 100",
   "knob-field-out-of-range": "{{knob}} must be between {{knobMin}} and {{knobMax}}",
