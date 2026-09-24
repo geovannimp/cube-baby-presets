@@ -112,6 +112,15 @@ const NewPreset: NextPage = () => {
     }
   }, [dialogMode, t]);
 
+  const modelSelectItems = useMemo(
+    () =>
+      models?.map((model) => ({
+        value: model.id,
+        label: model.name,
+      })) ?? [],
+    [models]
+  );
+
   useEffect(() => {
     if (preset && models) {
       form.reset({
@@ -235,6 +244,7 @@ const NewPreset: NextPage = () => {
                           <Field data-invalid={error ? true : undefined}>
                             <FieldLabel>{`${t("version-field")} *`}</FieldLabel>
                             <Select
+                              items={modelSelectItems}
                               value={field.state.value || null}
                               onValueChange={(value) => {
                                 if (value == null) return;
