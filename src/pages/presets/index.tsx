@@ -4,24 +4,21 @@ import Link from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import { useUser } from "../../hooks/useUser";
-import { chain } from "radash";
 import {
   debounce,
   parseAsInteger,
   parseAsString,
   useQueryStates,
 } from "nuqs";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ChangeEventHandler, useMemo, useState } from "react";
 
 import { usePresets } from "../../hooks/usePresets";
+import { usePresetAuthors } from "../../hooks/usePresetAuthors";
 import { useModels } from "../../hooks/useModels";
 import { Header } from "../../components/Header";
 import { Container } from "../../components/Container";
-import { PresetCard } from "../../components/PresetCard";
-import { ChangeEventHandler, useMemo } from "react";
-import { Preset } from "../../services/presetService";
+import { PresetsList } from "../../components/PresetsList";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,32 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
-
-const PAGE_SIZE = 48;
-
-const filterWithSearch = (search: string) => (presets?: Preset[]) =>
-  search
-    ? presets?.filter((preset) =>
-        (preset.name + preset.description).toLowerCase().includes(search)
-      )
-    : presets;
-
-const filterWithModel = (modelId: string) => (presets?: Preset[]) =>
-  modelId !== "all"
-    ? presets?.filter((preset) => preset.model_id === modelId)
-    : presets;
-
-const filterWithUser = (userId: string) => (presets?: Preset[]) =>
-  userId !== "all"
-    ? presets?.filter((preset) => preset.user_id === userId)
-    : presets;
+import { DEFAULT_PRESETS_PAGE_SIZE } from "../../services/presetService";
 
 const Presets: NextPage = () => {
   const { t } = useTranslation("presets");
   const { user } = useUser();
-  const { data: presets, isLoading: isLoadingPresets } = usePresets();
   const { data: models, isLoading: isLoadingModels } = useModels();
+  const { data: authors, isLoading: isLoadingAuthors } = usePresetAuthors();
+  const [asOf, setAsOf] = useState(() => new Date().toISOString());
 
   const [{ search, modelId, userId, page }, setQuery] = useQueryStates({
     search: parseAsString.withDefault("").withOptions({
@@ -73,24 +52,21 @@ const Presets: NextPage = () => {
     page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
   });
 
-  const isLoading = isLoadingPresets || isLoadingModels;
+  const presetsQuery = useMemo(
+    () => ({
+      search: search || undefined,
+      modelId: modelId === "all" ? undefined : modelId,
+      userId: userId === "all" ? undefined : userId,
+      page,
+      pageSize: DEFAULT_PRESETS_PAGE_SIZE,
+      asOf,
+    }),
+    [search, modelId, userId, page, asOf]
+  );
 
-  const users = useMemo(() => {
-    const byId = new Map<string, { id: string; username: string }>();
+  const { data, isLoading: isLoadingPresets } = usePresets(presetsQuery);
 
-    for (const preset of presets ?? []) {
-      if (!preset.user_id || byId.has(preset.user_id)) continue;
-
-      const profile = Array.isArray(preset.user) ? preset.user[0] : preset.user;
-
-      byId.set(preset.user_id, {
-        id: preset.user_id,
-        username: profile?.username?.trim() || preset.user_id,
-      });
-    }
-
-    return [...byId.values()];
-  }, [presets]);
+  const isLoading = isLoadingPresets || isLoadingModels || isLoadingAuthors;
 
   const modelSelectItems = useMemo(
     () => [
@@ -106,37 +82,16 @@ const Presets: NextPage = () => {
   const userSelectItems = useMemo(
     () => [
       { value: "all", label: t("presets-list-user-filter-all") },
-      ...users.map((user) => ({
-        value: user.id,
-        label: user.username,
-      })),
+      ...(authors?.map((author) => ({
+        value: author.id,
+        label: author.username,
+      })) ?? []),
     ],
-    [users, t]
+    [authors, t]
   );
-
-  const filteredPresets = useMemo(
-    () =>
-      chain(
-        filterWithSearch(search),
-        filterWithModel(modelId),
-        filterWithUser(userId)
-      )(presets) as Preset[] | undefined,
-    [search, modelId, userId, presets]
-  );
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil((filteredPresets?.length ?? 0) / PAGE_SIZE)
-  );
-  const currentPage = Math.min(Math.max(page, 1), totalPages);
-
-  const pagedPresets = useMemo(() => {
-    if (!filteredPresets?.length) return [];
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredPresets.slice(start, start + PAGE_SIZE);
-  }, [filteredPresets, currentPage]);
 
   const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    setAsOf(new Date().toISOString());
     void setQuery({
       search: e.target.value || null,
       page: null,
@@ -145,6 +100,7 @@ const Presets: NextPage = () => {
 
   const handleModelChange = (nextModelId: string | null) => {
     if (!nextModelId) return;
+    setAsOf(new Date().toISOString());
     void setQuery({
       modelId: nextModelId === "all" ? null : nextModelId,
       page: null,
@@ -153,6 +109,7 @@ const Presets: NextPage = () => {
 
   const handleUserChange = (nextUserId: string | null) => {
     if (!nextUserId) return;
+    setAsOf(new Date().toISOString());
     void setQuery({
       userId: nextUserId === "all" ? null : nextUserId,
       page: null,
@@ -229,9 +186,9 @@ const Presets: NextPage = () => {
                   <SelectItem value="all">
                     {t("presets-list-user-filter-all")}
                   </SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.username}
+                  {authors?.map((author) => (
+                    <SelectItem key={author.id} value={author.id}>
+                      {author.username}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -240,67 +197,18 @@ const Presets: NextPage = () => {
           </Field>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Spinner className="size-8" />
-          </div>
-        ) : filteredPresets?.length ? (
-          <>
-            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
-              {pagedPresets.map((preset) => (
-                <PresetCard
-                  key={preset.id}
-                  preset={preset}
-                  modelName={
-                    models?.find((model) => model.id === preset.model_id)?.name
-                  }
-                />
-              ))}
-            </div>
-
-            {totalPages > 1 ? (
-              <div className="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-                <p className="text-sm text-muted-foreground">
-                  {t("presets-list-pagination-status", {
-                    page: currentPage,
-                    totalPages,
-                    total: filteredPresets.length,
-                  })}
-                </p>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    className="min-h-9"
-                    disabled={currentPage <= 1}
-                    onClick={() =>
-                      void setQuery({
-                        page:
-                          currentPage - 1 <= 1 ? null : currentPage - 1,
-                      })
-                    }
-                  >
-                    <ChevronLeftIcon data-icon="inline-start" />
-                    {t("presets-list-pagination-previous")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="min-h-9"
-                    disabled={currentPage >= totalPages}
-                    onClick={() => void setQuery({ page: currentPage + 1 })}
-                  >
-                    {t("presets-list-pagination-next")}
-                    <ChevronRightIcon data-icon="inline-end" />
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-          </>
-        ) : (
-          <Empty className="my-6 py-24">
-            <EmptyTitle>{t("presets-list-empty")}</EmptyTitle>
-            <EmptyDescription />
-          </Empty>
-        )}
+        <PresetsList
+          presets={data?.presets ?? []}
+          models={models}
+          isLoading={isLoading}
+          page={page}
+          pageSize={DEFAULT_PRESETS_PAGE_SIZE}
+          totalCount={data?.totalCount ?? 0}
+          emptyTitle={t("presets-list-empty")}
+          onPageChange={(nextPage) =>
+            void setQuery({ page: nextPage <= 1 ? null : nextPage })
+          }
+        />
       </Container>
     </>
   );

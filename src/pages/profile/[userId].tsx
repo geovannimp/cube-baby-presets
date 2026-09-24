@@ -1,33 +1,50 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { UserCircleIcon } from "lucide-react";
+import { parseAsInteger, useQueryState } from "nuqs";
 
-import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
-import { Spinner } from "@/components/ui/spinner";
 import { Header } from "../../components/Header";
 import { Container } from "../../components/Container";
+import { PresetsList } from "../../components/PresetsList";
 import { usePresets } from "../../hooks/usePresets";
 import { useModels } from "../../hooks/useModels";
-import { PresetCard } from "../../components/PresetCard";
 import nextI18nextConfig from "../../../next-i18next.config";
 import { useProfile } from "../../hooks/useProfile";
+import { DEFAULT_PRESETS_PAGE_SIZE } from "../../services/presetService";
 
-const Account: NextPage = () => {
+const Profile: NextPage = () => {
   const { t } = useTranslation("profile");
   const router = useRouter();
   const { userId } = router.query;
+  const resolvedUserId = typeof userId === "string" ? userId : undefined;
+  const [asOf] = useState(() => new Date().toISOString());
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true })
+  );
 
   const options = useMemo(
-    () => (typeof userId === "string" ? { userId } : undefined),
-    [userId]
+    () =>
+      resolvedUserId
+        ? {
+            userId: resolvedUserId,
+            page,
+            pageSize: DEFAULT_PRESETS_PAGE_SIZE,
+            asOf,
+          }
+        : undefined,
+    [resolvedUserId, page, asOf]
   );
-  const { data: presets, isLoading: isLoadingPresets } = usePresets(options);
+
+  const { data, isLoading: isLoadingPresets } = usePresets(options, {
+    enabled: Boolean(resolvedUserId),
+  });
   const { data: models, isLoading: isLoadingModels } = useModels();
-  const { data: profile } = useProfile(options?.userId);
+  const { data: profile } = useProfile(resolvedUserId);
 
   const isLoading = isLoadingModels || isLoadingPresets;
 
@@ -52,28 +69,18 @@ const Account: NextPage = () => {
           <p className="text-2xl font-bold">{t("presets-list-title")}</p>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Spinner className="size-8" />
-          </div>
-        ) : presets?.length ? (
-          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {presets?.map((preset) => (
-              <PresetCard
-                key={preset.id}
-                preset={preset}
-                modelName={
-                  models?.find((model) => model.id === preset.model_id)?.name
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <Empty className="my-6 py-24">
-            <EmptyTitle>{t("presets-list-empty")}</EmptyTitle>
-            <EmptyDescription />
-          </Empty>
-        )}
+        <PresetsList
+          presets={data?.presets ?? []}
+          models={models}
+          isLoading={isLoading}
+          page={page}
+          pageSize={DEFAULT_PRESETS_PAGE_SIZE}
+          totalCount={data?.totalCount ?? 0}
+          emptyTitle={t("presets-list-empty")}
+          onPageChange={(nextPage) =>
+            void setPage(nextPage <= 1 ? null : nextPage)
+          }
+        />
       </Container>
     </>
   );
@@ -82,9 +89,9 @@ const Account: NextPage = () => {
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
   props: await serverSideTranslations(
     locale!,
-    ["common", "profile"],
+    ["common", "profile", "presets"],
     nextI18nextConfig
   ),
 });
 
-export default Account;
+export default Profile;
