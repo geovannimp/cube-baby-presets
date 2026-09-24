@@ -13,10 +13,10 @@ import { toast } from "sonner";
 
 import { UserService } from "../services/userService";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { AuthShell } from "../components/AuthShell";
 
 const SignUp = () => {
   const { t } = useTranslation("signup");
@@ -83,91 +83,97 @@ const SignUp = () => {
   return (
     <>
       <Head>
-        <title>Cube Baby Presets - Sign Un</title>
+        <title>Cube Baby Presets - Sign Up</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="flex h-screen w-full flex-col items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col gap-8 pt-6">
-            <p className="pt-6 pb-4 text-center text-2xl font-bold text-foreground">
-              Cube Baby Presets
-            </p>
 
-            <form onSubmit={handleSignup}>
-              <FieldGroup>
-                <Field data-invalid={!!errors.username || undefined}>
-                  <FieldLabel htmlFor="username">{`${t("username-field")} *`}</FieldLabel>
-                  <Input
-                    id="username"
-                    aria-invalid={!!errors.username}
-                    {...register("username")}
-                  />
-                  {errors.username?.message && (
-                    <FieldError>{errors.username.message}</FieldError>
-                  )}
-                </Field>
-                <Field data-invalid={!!errors.email || undefined}>
-                  <FieldLabel htmlFor="email">{`${t("email-field")} *`}</FieldLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    aria-invalid={!!errors.email}
-                    required
-                    {...register("email")}
-                  />
-                  {errors.email?.message && (
-                    <FieldError>{errors.email.message}</FieldError>
-                  )}
-                </Field>
-                <Field data-invalid={!!errors.password || undefined}>
-                  <FieldLabel htmlFor="password">{`${t("password-field")} *`}</FieldLabel>
-                  <Input
-                    id="password"
-                    type="password"
-                    aria-invalid={!!errors.password}
-                    {...register("password")}
-                  />
-                  {errors.password?.message && (
-                    <FieldError>{errors.password.message}</FieldError>
-                  )}
-                </Field>
-                <Field data-invalid={!!errors.confirmPassword || undefined}>
-                  <FieldLabel htmlFor="confirmPassword">{`${t("confirm-password-field")} *`}</FieldLabel>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    aria-invalid={!!errors.confirmPassword}
-                    {...register("confirmPassword")}
-                  />
-                  {errors.confirmPassword?.message && (
-                    <FieldError>{errors.confirmPassword.message}</FieldError>
-                  )}
-                </Field>
-                <Button className="mt-2 w-full" disabled={!isValid} type="submit">
-                  {isSubmitting ? <Spinner /> : t("signup-button")}
-                </Button>
-              </FieldGroup>
-            </form>
-
-            <span className="pt-1 text-center text-sm">
-              <span className="text-muted-foreground">{t("with-account")}</span>
-              {` `}
-              <Link
-                href="/signin"
-                className="font-bold text-primary hover:underline"
-              >
-                {t("with-account-link")}
-              </Link>
-            </span>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthShell
+        title={t("signup-button")}
+        footer={
+          <p className="text-sm leading-relaxed">
+            <span className="text-muted-foreground">{t("with-account")}</span>
+            {` `}
+            <Link
+              href="/signin"
+              className="font-semibold text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none dark:text-[oklch(0.82_0.12_255)]"
+            >
+              {t("with-account-link")}
+            </Link>
+          </p>
+        }
+      >
+        <form onSubmit={handleSignup} noValidate>
+          <FieldGroup>
+            <Field data-invalid={!!errors.username || undefined}>
+              <FieldLabel htmlFor="username">{`${t("username-field")} *`}</FieldLabel>
+              <Input
+                id="username"
+                autoComplete="username"
+                autoFocus
+                aria-invalid={!!errors.username}
+                {...register("username")}
+              />
+              {errors.username?.message && (
+                <FieldError>{errors.username.message}</FieldError>
+              )}
+            </Field>
+            <Field data-invalid={!!errors.email || undefined}>
+              <FieldLabel htmlFor="email">{`${t("email-field")} *`}</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                aria-invalid={!!errors.email}
+                required
+                {...register("email")}
+              />
+              {errors.email?.message && (
+                <FieldError>{errors.email.message}</FieldError>
+              )}
+            </Field>
+            <Field data-invalid={!!errors.password || undefined}>
+              <FieldLabel htmlFor="password">{`${t("password-field")} *`}</FieldLabel>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                aria-invalid={!!errors.password}
+                {...register("password")}
+              />
+              {errors.password?.message && (
+                <FieldError>{errors.password.message}</FieldError>
+              )}
+            </Field>
+            <Field data-invalid={!!errors.confirmPassword || undefined}>
+              <FieldLabel htmlFor="confirmPassword">{`${t("confirm-password-field")} *`}</FieldLabel>
+              <Input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                aria-invalid={!!errors.confirmPassword}
+                {...register("confirmPassword")}
+              />
+              {errors.confirmPassword?.message && (
+                <FieldError>{errors.confirmPassword.message}</FieldError>
+              )}
+            </Field>
+            <Button
+              className="mt-3 h-11 w-full text-base"
+              size="lg"
+              disabled={!isValid || isSubmitting}
+              type="submit"
+            >
+              {isSubmitting ? <Spinner /> : t("signup-button")}
+            </Button>
+          </FieldGroup>
+        </form>
+      </AuthShell>
     </>
   );
 };
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-  props: await serverSideTranslations(locale!, ["signup"]),
+  props: await serverSideTranslations(locale!, ["common", "signup"]),
 });
 
 export default SignUp;

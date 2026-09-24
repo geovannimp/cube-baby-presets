@@ -12,10 +12,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { AuthShell } from "../components/AuthShell";
 import { UserService } from "../services/userService";
 
 const SignIn = () => {
@@ -73,59 +73,62 @@ const SignIn = () => {
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <div className="flex h-screen w-full flex-col items-center justify-center">
-          <Card className="w-full max-w-md">
-            <CardContent className="flex flex-col gap-8 pt-6">
-              <p className="pt-6 pb-4 text-center text-2xl font-bold text-foreground">
-                Cube Baby Presets
-              </p>
-
-              <form onSubmit={onSubmit}>
-                <FieldGroup>
-                  <Field data-invalid={!!errors.email || undefined}>
-                    <FieldLabel htmlFor="email">{`${t("email-field")} *`}</FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      aria-invalid={!!errors.email}
-                      {...register("email")}
-                    />
-                    {errors.email?.message && (
-                      <FieldError>{errors.email.message}</FieldError>
-                    )}
-                  </Field>
-                  <Field data-invalid={!!errors.password || undefined}>
-                    <FieldLabel htmlFor="password">{`${t("password-field")} *`}</FieldLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      aria-invalid={!!errors.password}
-                      required
-                      {...register("password")}
-                    />
-                    {errors.password?.message && (
-                      <FieldError>{errors.password.message}</FieldError>
-                    )}
-                  </Field>
-                  <Button className="mt-2 w-full" type="submit" disabled={!isValid}>
-                    {isSubmitting ? <Spinner /> : t("signin-button")}
-                  </Button>
-                </FieldGroup>
-              </form>
-
-              <span className="pt-1 text-center text-sm">
-                <span className="text-muted-foreground">{t("no-account")}</span>
-                {` `}
-                <Link
-                  href="/signup"
-                  className="font-bold text-primary hover:underline"
-                >
-                  {t("no-account-link")}
-                </Link>
-              </span>
-            </CardContent>
-          </Card>
-        </div>
+        <AuthShell
+          title={t("signin-button")}
+          footer={
+            <p className="text-sm leading-relaxed">
+              <span className="text-muted-foreground">{t("no-account")}</span>
+              {` `}
+              <Link
+                href="/signup"
+                className="font-semibold text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none dark:text-[oklch(0.82_0.12_255)]"
+              >
+                {t("no-account-link")}
+              </Link>
+            </p>
+          }
+        >
+          <form onSubmit={onSubmit} noValidate>
+            <FieldGroup>
+              <Field data-invalid={!!errors.email || undefined}>
+                <FieldLabel htmlFor="email">{`${t("email-field")} *`}</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  autoFocus
+                  aria-invalid={!!errors.email}
+                  {...register("email")}
+                />
+                {errors.email?.message && (
+                  <FieldError>{errors.email.message}</FieldError>
+                )}
+              </Field>
+              <Field data-invalid={!!errors.password || undefined}>
+                <FieldLabel htmlFor="password">{`${t("password-field")} *`}</FieldLabel>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  aria-invalid={!!errors.password}
+                  required
+                  {...register("password")}
+                />
+                {errors.password?.message && (
+                  <FieldError>{errors.password.message}</FieldError>
+                )}
+              </Field>
+              <Button
+                className="mt-3 h-11 w-full text-base"
+                size="lg"
+                type="submit"
+                disabled={!isValid || isSubmitting}
+              >
+                {isSubmitting ? <Spinner /> : t("signin-button")}
+              </Button>
+            </FieldGroup>
+          </form>
+        </AuthShell>
       </>
     );
 
@@ -137,7 +140,7 @@ const SignIn = () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-  props: await serverSideTranslations(locale!, ["signin"]),
+  props: await serverSideTranslations(locale!, ["common", "signin"]),
 });
 
 export default SignIn;
