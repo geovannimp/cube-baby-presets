@@ -2,14 +2,13 @@ import Link from "next/link";
 import Head from "next/head";
 import { GetStaticProps } from "next/types";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useForm } from "@tanstack/react-form";
 import { useUser } from "../hooks/useUser";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { toast } from "sonner";
 import { useTranslation } from "next-i18next";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -17,46 +16,52 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { AuthShell } from "../components/AuthShell";
 import { UserService } from "../services/userService";
+import { fieldErrorMessage } from "../utils/fieldErrorMessage";
 
 const SignIn = () => {
   const { t } = useTranslation("signin");
   const router = useRouter();
   const { user } = useUser();
 
-  const schema = z
-    .object({
-      email: z
-        .string({
-          required_error: t("email-field-required-error"),
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          email: z
+            .string({
+              required_error: t("email-field-required-error"),
+            })
+            .min(1, t("email-field-required-error"))
+            .email(t("email-field-validation-error")),
+          password: z
+            .string({
+              required_error: t("password-field-required-error"),
+            })
+            .min(6, t("password-field-min-length-error")),
         })
-        .email(t("email-field-validation-error")),
-      password: z
-        .string({
-          required_error: t("password-field-required-error"),
-        })
-        .min(6, t("password-field-min-length-error")),
-    })
-    .required();
+        .required(),
+    [t]
+  );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid, isSubmitting },
-  } = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
-    mode: "onBlur",
-  });
-
-  const onSubmit = handleSubmit(async ({ email, password }) => {
-    try {
-      await UserService.signin({ email, password });
-    } catch ({ message }: any) {
-      if (message === "Invalid login credentials") {
-        toast.error(t("submit-invalid-grant-error"));
-      } else {
-        toast.error(message as string);
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    validators: {
+      onSubmit: schema,
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        await UserService.signin(value);
+      } catch ({ message }: any) {
+        if (message === "Invalid login credentials") {
+          toast.error(t("submit-invalid-grant-error"));
+        } else {
+          toast.error(message as string);
+        }
       }
-    }
+    },
   });
 
   useEffect(() => {
@@ -88,44 +93,70 @@ const SignIn = () => {
             </p>
           }
         >
-          <form onSubmit={onSubmit} noValidate>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void form.handleSubmit();
+            }}
+            noValidate
+          >
             <FieldGroup>
-              <Field data-invalid={!!errors.email || undefined}>
-                <FieldLabel htmlFor="email">{`${t("email-field")} *`}</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  autoFocus
-                  aria-invalid={!!errors.email}
-                  {...register("email")}
-                />
-                {errors.email?.message && (
-                  <FieldError>{errors.email.message}</FieldError>
+              <form.Field name="email">
+                {(field) => {
+                  const error = fieldErrorMessage(field.state.meta.errors);
+                  return (
+                    <Field data-invalid={error ? true : undefined}>
+                      <FieldLabel htmlFor={field.name}>{`${t("email-field")} *`}</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        aria-invalid={!!error}
+                      />
+                      {error ? <FieldError>{error}</FieldError> : null}
+                    </Field>
+                  );
+                }}
+              </form.Field>
+              <form.Field name="password">
+                {(field) => {
+                  const error = fieldErrorMessage(field.state.meta.errors);
+                  return (
+                    <Field data-invalid={error ? true : undefined}>
+                      <FieldLabel htmlFor={field.name}>{`${t("password-field")} *`}</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="password"
+                        autoComplete="current-password"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        aria-invalid={!!error}
+                      />
+                      {error ? <FieldError>{error}</FieldError> : null}
+                    </Field>
+                  );
+                }}
+              </form.Field>
+              <form.Subscribe selector={(state) => state.isSubmitting}>
+                {(isSubmitting) => (
+                  <Button
+                    className="mt-3 h-11 w-full text-base"
+                    size="lg"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? <Spinner /> : t("signin-button")}
+                  </Button>
                 )}
-              </Field>
-              <Field data-invalid={!!errors.password || undefined}>
-                <FieldLabel htmlFor="password">{`${t("password-field")} *`}</FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  aria-invalid={!!errors.password}
-                  required
-                  {...register("password")}
-                />
-                {errors.password?.message && (
-                  <FieldError>{errors.password.message}</FieldError>
-                )}
-              </Field>
-              <Button
-                className="mt-3 h-11 w-full text-base"
-                size="lg"
-                type="submit"
-                disabled={!isValid || isSubmitting}
-              >
-                {isSubmitting ? <Spinner /> : t("signin-button")}
-              </Button>
+              </form.Subscribe>
             </FieldGroup>
           </form>
         </AuthShell>

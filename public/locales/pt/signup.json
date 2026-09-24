@@ -10,6 +10,7 @@
   "username-field": "Nome de usuario",
   "email-field": "Email",
   "password-field": "Senha",
+  "password-field-description": "Deve ter ao menos 6 caracteres.",
   "confirm-password-field": "Confirme sua senha",
   "signup-button": "Cadastrar-se",
   "with-account": "Já tem uma conta?",
