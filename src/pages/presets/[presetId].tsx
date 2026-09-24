@@ -5,7 +5,6 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -25,23 +24,15 @@ import { Container } from "../../components/Container";
 import { DeletePresetDialog } from "../../components/DeletePresetDialog";
 import { Header } from "../../components/Header";
 import { KnobsForm } from "../../components/KnobsForm";
+import { useAppForm } from "../../hooks/form";
 import { useModels } from "../../hooks/useModels";
 import nextI18nextConfig from "../../../next-i18next.config";
+import { presetFormOpts } from "../../hooks/presetFormOptions";
 import { usePresetFormSchema } from "../../hooks/usePresetFormSchema";
 import { usePreset } from "../../hooks/usePreset";
 import { useUpdatePreset } from "../../hooks/useUpdatePreset";
 import { useCreatePreset } from "../../hooks/useCreatePreset";
-import type { PresetFormValues } from "../../types/presetForm";
 import { fieldErrorMessage } from "../../utils/fieldErrorMessage";
-
-const defaultValues: PresetFormValues = {
-  name: "",
-  description: "",
-  customIR: "",
-  customIRDistance: 0,
-  modelId: "",
-  knobValues: {},
-};
 
 const NewPreset: NextPage = () => {
   const { t } = useTranslation("preset");
@@ -60,8 +51,8 @@ const NewPreset: NextPage = () => {
 
   const schema = usePresetFormSchema(models);
 
-  const form = useForm({
-    defaultValues,
+  const form = useAppForm({
+    ...presetFormOpts,
     validators: {
       onSubmit: schema,
     },
