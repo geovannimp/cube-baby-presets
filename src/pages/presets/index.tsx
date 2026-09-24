@@ -125,91 +125,113 @@ const Presets: NextPage = () => {
 
       <Header />
 
-      <Container className="my-8 gap-4">
-        <div className="flex flex-row items-center justify-between">
-          <p className="text-2xl font-bold">{t("presets-list-title")}</p>
-          {user && (
-            <Button nativeButton={false} render={<Link href="/presets/new" />}>
-              {t("presets-list-button")}
-            </Button>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4 md:flex-row">
-          <Field className="flex-1">
-            <FieldLabel htmlFor="presets-search">
-              {t("presets-list-search-filter")}
-            </FieldLabel>
-            <Input
-              id="presets-search"
-              value={search}
-              onChange={handleSearchChange}
-              placeholder={t("presets-list-search-filter-placeholder")}
-            />
-          </Field>
-          <Field className="w-full md:w-1/4">
-            <FieldLabel>{t("presets-list-model-filter")}</FieldLabel>
-            <Select
-              items={modelSelectItems}
-              value={modelId}
-              onValueChange={handleModelChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="all">
-                    {t("presets-list-model-filter-all")}
-                  </SelectItem>
-                  {models?.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      {model.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field className="w-full md:w-1/4">
-            <FieldLabel>{t("presets-list-user-filter")}</FieldLabel>
-            <Select
-              items={userSelectItems}
-              value={userId}
-              onValueChange={handleUserChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="all">
-                    {t("presets-list-user-filter-all")}
-                  </SelectItem>
-                  {authors?.map((author) => (
-                    <SelectItem key={author.id} value={author.id}>
-                      {author.username}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
-
-        <PresetsList
-          presets={data?.presets ?? []}
-          models={models}
-          isLoading={isLoading}
-          page={page}
-          pageSize={DEFAULT_PRESETS_PAGE_SIZE}
-          totalCount={data?.totalCount ?? 0}
-          emptyTitle={t("presets-list-empty")}
-          onPageChange={(nextPage) =>
-            void setQuery({ page: nextPage <= 1 ? null : nextPage })
-          }
+      <main className="relative flex w-full flex-1 flex-col items-center overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_10%_0%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(ellipse_60%_40%_at_95%_30%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
         />
-      </Container>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 right-[-12%] size-[min(36rem,85vw)] rounded-full bg-primary/10 blur-3xl"
+        />
+
+        <Container className="relative z-10 my-10 w-full gap-10 py-4 md:my-14 md:py-6">
+          <div className="animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-700 ease-out motion-reduce:animate-none">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+              <h1 className="font-heading max-w-[16ch] text-4xl leading-[1.05] font-bold tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
+                {t("presets-list-title")}
+              </h1>
+              {user ? (
+                <Button
+                  size="lg"
+                  className="h-11 shrink-0 px-8 text-base"
+                  nativeButton={false}
+                  render={<Link href="/presets/new" />}
+                >
+                  {t("presets-list-button")}
+                </Button>
+              ) : null}
+            </div>
+
+            <div className="mt-10 flex flex-col gap-4 md:flex-row md:items-end">
+              <Field className="flex-1">
+                <FieldLabel htmlFor="presets-search">
+                  {t("presets-list-search-filter")}
+                </FieldLabel>
+                <Input
+                  id="presets-search"
+                  value={search}
+                  onChange={handleSearchChange}
+                  placeholder={t("presets-list-search-filter-placeholder")}
+                />
+              </Field>
+              <Field className="w-full md:w-1/4">
+                <FieldLabel>{t("presets-list-model-filter")}</FieldLabel>
+                <Select
+                  items={modelSelectItems}
+                  value={modelId}
+                  onValueChange={handleModelChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="all">
+                        {t("presets-list-model-filter-all")}
+                      </SelectItem>
+                      {models?.map((model) => (
+                        <SelectItem key={model.id} value={model.id}>
+                          {model.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field className="w-full md:w-1/4">
+                <FieldLabel>{t("presets-list-user-filter")}</FieldLabel>
+                <Select
+                  items={userSelectItems}
+                  value={userId}
+                  onValueChange={handleUserChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="all">
+                        {t("presets-list-user-filter-all")}
+                      </SelectItem>
+                      {authors?.map((author) => (
+                        <SelectItem key={author.id} value={author.id}>
+                          {author.username}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
+
+            <div className="mt-10">
+              <PresetsList
+                presets={data?.presets ?? []}
+                models={models}
+                isLoading={isLoading}
+                page={page}
+                pageSize={DEFAULT_PRESETS_PAGE_SIZE}
+                totalCount={data?.totalCount ?? 0}
+                emptyTitle={t("presets-list-empty")}
+                onPageChange={(nextPage) =>
+                  void setQuery({ page: nextPage <= 1 ? null : nextPage })
+                }
+              />
+            </div>
+          </div>
+        </Container>
+      </main>
     </>
   );
 };
