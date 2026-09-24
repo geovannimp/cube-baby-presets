@@ -7,5 +7,8 @@
   "presets-list-model-filter": "Modelo",
   "presets-list-model-filter-all": "Todos modelos",
   "presets-list-user-filter": "Usuário",
-  "presets-list-user-filter-all": "Todos usuários"
+  "presets-list-user-filter-all": "Todos usuários",
+  "presets-list-pagination-previous": "Anterior",
+  "presets-list-pagination-next": "Próxima",
+  "presets-list-pagination-status": "Página {{page}} de {{totalPages}} ({{total}} presets)"
 }
