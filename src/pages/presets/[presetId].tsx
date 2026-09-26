@@ -126,14 +126,21 @@ const NewPreset: NextPage = () => {
 
   useEffect(() => {
     if (preset && models) {
-      form.reset({
-        customIR: preset.custom_ir?.url ?? "",
-        customIRDistance: preset.custom_ir?.distance ?? 0,
-        description: preset.description ?? "",
-        name: preset.name,
-        modelId: preset.model_id,
-        knobValues: preset.knobs_values ?? {},
-      });
+      // `keepDefaultValues` is required: `reset(values)` otherwise promotes the
+      // preset to the form's new `defaultValues`, and `useForm` re-applies the
+      // options we hand it (`presetFormOpts`, i.e. the blank create-form values)
+      // after every render, wiping the hydration on the next re-render.
+      form.reset(
+        {
+          customIR: preset.custom_ir?.url ?? "",
+          customIRDistance: preset.custom_ir?.distance ?? 0,
+          description: preset.description ?? "",
+          name: preset.name,
+          modelId: preset.model_id,
+          knobValues: preset.knobs_values ?? {},
+        },
+        { keepDefaultValues: true }
+      );
     }
   }, [preset, models]); // eslint-disable-line react-hooks/exhaustive-deps -- reset only when preset/models load
 
