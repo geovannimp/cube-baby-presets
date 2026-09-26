@@ -1,6 +1,6 @@
 # Cube Baby Presets
 
-A Next.js app for sharing Tonex Studio pedal presets.
+A Next.js app for sharing Tonex Studio presets for the Cuvave M-VACE Cube Baby.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ change both.
 
 ### Using a hosted Supabase project instead
 
-If you don't have Docker, point the app at a real project instead:
+If you don't have Docker, point the app at a real Supabase project instead:
 
 ```bash
 npx supabase login                                   # once per machine
