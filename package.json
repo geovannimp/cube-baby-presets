@@ -8,7 +8,15 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc -b ./",
-    "i18n": "i18next 'src/**/*.{ts,tsx}' [-oc]"
+    "i18n": "i18next 'src/**/*.{ts,tsx}' [-oc]",
+    "db:start": "npx supabase@2.118.0 start",
+    "db:stop": "npx supabase@2.118.0 stop",
+    "db:status": "npx supabase@2.118.0 status",
+    "db:reset": "npx supabase@2.118.0 db reset",
+    "db:diff": "npx supabase@2.118.0 db diff",
+    "db:pull": "npx supabase@2.118.0 db pull",
+    "db:push": "npx supabase@2.118.0 db push",
+    "db:link": "npx supabase@2.118.0 link"
   },
   "engines": {
     "node": ">=20.9.0",
