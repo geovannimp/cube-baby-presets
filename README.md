@@ -1,6 +1,6 @@
 # Cube Baby Presets
 
-A Next.js app for sharing Tonex Studio presets for the Cuvave M-VACE Cube Baby.
+A Next.js app for sharing presets for the Cube Baby pedal.
 
 ## Requirements
 
