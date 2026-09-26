@@ -67,20 +67,30 @@ deployment target, not the place to edit schema by hand.
 | `npm run db:status` | Print local credentials and service status |
 | `npm run db:reset` | Drop and rebuild the local DB from migrations + seed |
 | `npm run db:link` | Link this directory to a hosted project |
-| `npm run db:diff -f <name>` | Generate a migration by diffing local vs. linked |
+| `npm run db:diff -f <name>` | Generate a migration from the local DB vs. a shadow built from `supabase/migrations` |
 | `npm run db:push` | Apply pending migrations to the linked project |
 | `npm run db:pull` | Pull the linked project's current schema into a new migration |
 
 ### Changing the schema
 
+`db:diff` compares your **running local database** against a **shadow database
+rebuilt from `supabase/migrations`** — so make the change locally first, then
+capture it as a migration:
+
 ```bash
+npm run db:start
+# apply the change by hand in Studio (http://127.0.0.1:54323) or over psql
 npm run db:diff -f add_preset_favorites   # writes supabase/migrations/<ts>_add_preset_favorites.sql
 # review the SQL, then:
 npm run db:push                           # apply to the linked project
 ```
 
-`db:diff` compares the local DB against the linked one, so keep the local stack
-running. Commit the generated migration in the same PR as the code that needs it.
+Commit the generated migration in the same PR as the code that needs it. This
+step needs Docker, since the diff runs against the local stack.
+
+If you changed the schema directly in the hosted dashboard instead, capture it
+with `npm run db:diff -- --linked -f <name>`, which diffs against the linked
+project and needs no Docker.
 
 ### Schema changes and RLS
 
