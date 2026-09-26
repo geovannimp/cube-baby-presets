@@ -10,6 +10,7 @@ import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { Header } from "../components/Header";
 import { Container } from "../components/Container";
+import { Logo } from "../components/Logo";
 import { PresetCard } from "../components/PresetCard";
 import { useModels } from "../hooks/useModels";
 import { usePresets } from "../hooks/usePresets";
@@ -50,8 +51,9 @@ const Home: NextPage = () => {
         <Container className="relative z-10 flex min-h-[calc(100svh-4.5rem)] w-full flex-col justify-center py-16 md:py-24">
           <div className="animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-700 ease-out motion-reduce:animate-none">
             <div className="max-w-3xl">
-              <h1 className="font-heading text-4xl leading-[1.05] font-bold tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.75rem]">
-                Cube Baby Presets
+              <h1 className="text-foreground">
+                <Logo aria-hidden className="w-56 sm:w-72 xl:w-80" />
+                <span className="sr-only">Cube Baby Presets</span>
               </h1>
               <p className="mt-2 max-w-[38rem] text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
                 {t("project-description")}
