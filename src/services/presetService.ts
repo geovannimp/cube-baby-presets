@@ -15,7 +15,13 @@ export interface Preset {
   };
   model_id: string;
   custom_ir?: PresetCustomIR;
+  vote_up_count: number;
+  vote_down_count: number;
 }
+
+export type PresetInput = Omit<Preset, "id" | "user" | "vote_up_count" | "vote_down_count">;
+
+export type PresetSort = "recent" | "liked" | "disliked";
 
 const PRESET_SELECT = `
   id,
@@ -29,7 +35,9 @@ const PRESET_SELECT = `
     id, username
   ),
   model_id,
-  custom_ir
+  custom_ir,
+  vote_up_count,
+  vote_down_count
 `;
 
 export const DEFAULT_PRESETS_PAGE_SIZE = 48;
@@ -41,6 +49,7 @@ export interface GetPresetsOptions {
   page?: number;
   pageSize?: number;
   asOf?: string;
+  sort?: PresetSort;
 }
 
 export interface GetPresetsResult {
@@ -76,6 +85,7 @@ const getPresets = async ({
   page = 1,
   pageSize = DEFAULT_PRESETS_PAGE_SIZE,
   asOf,
+  sort = "recent",
 }: GetPresetsOptions = {}): Promise<GetPresetsResult> => {
   const safePage = Math.max(page, 1);
   const from = (safePage - 1) * pageSize;
@@ -101,10 +111,27 @@ const getPresets = async ({
     query = query.or(`name.ilike."${pattern}",description.ilike."${pattern}"`);
   }
 
-  const { error, data: presets, count } = await query
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false })
-    .range(from, to);
+  if (sort === "liked") {
+    query = query
+      .order("vote_score", { ascending: false })
+      .order("vote_up_count", { ascending: false })
+      .order("vote_down_count", { ascending: true })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
+  } else if (sort === "disliked") {
+    query = query
+      .order("vote_score", { ascending: true })
+      .order("vote_down_count", { ascending: false })
+      .order("vote_up_count", { ascending: true })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
+  } else {
+    query = query
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
+  }
+
+  const { error, data: presets, count } = await query.range(from, to);
 
   if (presets) {
     return {
@@ -141,7 +168,7 @@ const getPresetAuthors = async (): Promise<PresetAuthor[]> => {
   return [...byId.values()];
 };
 
-const createPreset = async (presetToInset: Omit<Preset, "id" | "user">) => {
+const createPreset = async (presetToInset: PresetInput) => {
   const { error, data: preset } = await getSupabase()
     .from("presets")
     .insert({
@@ -157,7 +184,9 @@ const createPreset = async (presetToInset: Omit<Preset, "id" | "user">) => {
   throw error ?? new Error("Failed to create preset");
 };
 
-const updatePreset = async (presetToUpdate: Omit<Preset, "user">) => {
+const updatePreset = async (
+  presetToUpdate: PresetInput & { id: number }
+) => {
   const { error, data: preset } = await getSupabase()
     .from("presets")
     .update({

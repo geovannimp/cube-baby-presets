@@ -8,6 +8,7 @@ import {
   debounce,
   parseAsInteger,
   parseAsString,
+  parseAsStringLiteral,
   useQueryStates,
 } from "nuqs";
 import { ChangeEventHandler, useMemo, useState } from "react";
@@ -29,7 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DEFAULT_PRESETS_PAGE_SIZE } from "../../services/presetService";
+import {
+  DEFAULT_PRESETS_PAGE_SIZE,
+  type PresetSort,
+} from "../../services/presetService";
 
 const Presets: NextPage = () => {
   const { t } = useTranslation("presets");
@@ -38,19 +42,22 @@ const Presets: NextPage = () => {
   const { data: authors, isLoading: isLoadingAuthors } = usePresetAuthors();
   const [asOf, setAsOf] = useState(() => new Date().toISOString());
 
-  const [{ search, modelId, userId, page }, setQuery] = useQueryStates({
-    search: parseAsString.withDefault("").withOptions({
-      clearOnDefault: true,
-      limitUrlUpdates: debounce(300),
-    }),
-    modelId: parseAsString.withDefault("all").withOptions({
-      clearOnDefault: true,
-    }),
-    userId: parseAsString.withDefault("all").withOptions({
-      clearOnDefault: true,
-    }),
-    page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
-  });
+  const [{ search, modelId, userId, page, sort }, setQuery] = useQueryStates({
+      search: parseAsString.withDefault("").withOptions({
+        clearOnDefault: true,
+        limitUrlUpdates: debounce(300),
+      }),
+      modelId: parseAsString.withDefault("all").withOptions({
+        clearOnDefault: true,
+      }),
+      userId: parseAsString.withDefault("all").withOptions({
+        clearOnDefault: true,
+      }),
+      page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
+      sort: parseAsStringLiteral(["recent", "liked", "disliked"])
+        .withDefault("recent")
+        .withOptions({ clearOnDefault: true }),
+    });
 
   const presetsQuery = useMemo(
     () => ({
@@ -60,8 +67,9 @@ const Presets: NextPage = () => {
       page,
       pageSize: DEFAULT_PRESETS_PAGE_SIZE,
       asOf,
+      sort: sort === "recent" ? undefined : sort,
     }),
-    [search, modelId, userId, page, asOf]
+    [search, modelId, userId, page, asOf, sort]
   );
 
   const { data, isLoading: isLoadingPresets } = usePresets(presetsQuery);
@@ -90,6 +98,15 @@ const Presets: NextPage = () => {
     [authors, t]
   );
 
+  const sortSelectItems = useMemo(
+    () => [
+      { value: "recent", label: t("presets-list-sort-recent") },
+      { value: "liked", label: t("presets-list-sort-liked") },
+      { value: "disliked", label: t("presets-list-sort-disliked") },
+    ],
+    [t]
+  );
+
   const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setAsOf(new Date().toISOString());
     void setQuery({
@@ -115,6 +132,16 @@ const Presets: NextPage = () => {
       page: null,
     });
   };
+
+  const handleSortChange = (nextSort: PresetSort | null) => {
+    if (!nextSort) return;
+    setAsOf(new Date().toISOString());
+    void setQuery({
+      sort: nextSort === "recent" ? null : nextSort,
+      page: null,
+    });
+  };
+
 
   return (
     <>
@@ -149,8 +176,8 @@ const Presets: NextPage = () => {
               ) : null}
             </div>
 
-            <div className="mt-10 flex flex-col gap-4 md:flex-row md:items-end">
-              <Field className="flex-1">
+            <div className="mt-10 flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end">
+              <Field className="w-full md:min-w-64 md:flex-1">
                 <FieldLabel htmlFor="presets-search">
                   {t("presets-list-search-filter")}
                 </FieldLabel>
@@ -161,7 +188,7 @@ const Presets: NextPage = () => {
                   placeholder={t("presets-list-search-filter-placeholder")}
                 />
               </Field>
-              <Field className="w-full md:w-1/4">
+              <Field className="w-full md:w-44">
                 <FieldLabel>{t("presets-list-model-filter")}</FieldLabel>
                 <Select
                   items={modelSelectItems}
@@ -185,7 +212,7 @@ const Presets: NextPage = () => {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field className="w-full md:w-1/4">
+              <Field className="w-full md:w-44">
                 <FieldLabel>{t("presets-list-user-filter")}</FieldLabel>
                 <Select
                   items={userSelectItems}
@@ -203,6 +230,27 @@ const Presets: NextPage = () => {
                       {authors?.map((author) => (
                         <SelectItem key={author.id} value={author.id}>
                           {author.username}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field className="w-full md:w-44">
+                <FieldLabel>{t("presets-list-sort")}</FieldLabel>
+                <Select
+                  items={sortSelectItems}
+                  value={sort}
+                  onValueChange={handleSortChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {sortSelectItems.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
                         </SelectItem>
                       ))}
                     </SelectGroup>

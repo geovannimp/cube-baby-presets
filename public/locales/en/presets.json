@@ -10,5 +10,9 @@
   "presets-list-user-filter-all": "All users",
   "presets-list-pagination-previous": "Previous",
   "presets-list-pagination-next": "Next",
-  "presets-list-pagination-status": "Page {{page}} of {{totalPages}} ({{total}} presets)"
+  "presets-list-pagination-status": "Page {{page}} of {{totalPages}} ({{total}} presets)",
+  "presets-list-sort": "Sort",
+  "presets-list-sort-recent": "Newest",
+  "presets-list-sort-liked": "Most liked",
+  "presets-list-sort-disliked": "Most disliked"
 }
