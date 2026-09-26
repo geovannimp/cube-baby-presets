@@ -1,4 +1,4 @@
-import { supabaseClient } from "@supabase/supabase-auth-helpers/nextjs";
+import { createClient } from "../utils/supabase/client";
 
 export type PresetCustomIR = { url: string; distance: number };
 export interface Preset {
@@ -32,86 +32,166 @@ const PRESET_SELECT = `
   custom_ir
 `;
 
+export const DEFAULT_PRESETS_PAGE_SIZE = 48;
+
 export interface GetPresetsOptions {
   userId?: string;
+  modelId?: string;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+  asOf?: string;
 }
 
+export interface GetPresetsResult {
+  presets: Preset[];
+  totalCount: number;
+}
+
+export type PresetAuthor = {
+  id: string;
+  username: string;
+};
+
+const getSupabase = () => createClient();
+
 const getPreset = async (presetId: number): Promise<Preset> => {
-  const { error, data: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .select(PRESET_SELECT)
     .eq("id", presetId)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Preset not found");
 };
 
-const getPresets = async ({ userId }: GetPresetsOptions = {}): Promise<
-  Preset[]
-> => {
-  let query = supabaseClient.from<Preset>("presets").select(PRESET_SELECT);
+const getPresets = async ({
+  userId,
+  modelId,
+  search,
+  page = 1,
+  pageSize = DEFAULT_PRESETS_PAGE_SIZE,
+  asOf,
+}: GetPresetsOptions = {}): Promise<GetPresetsResult> => {
+  const safePage = Math.max(page, 1);
+  const from = (safePage - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = getSupabase()
+    .from("presets")
+    .select(PRESET_SELECT, { count: "exact" });
+
   if (userId) {
     query = query.eq("user_id", userId);
   }
-  const { error, data: presets } = await query;
-  if (presets) {
-    return presets;
-  } else {
-    throw error;
+  if (modelId) {
+    query = query.eq("model_id", modelId);
   }
+  if (asOf) {
+    query = query.lte("created_at", asOf);
+  }
+
+  const trimmedSearch = search?.trim();
+  if (trimmedSearch) {
+    const pattern = `%${trimmedSearch.replace(/[%_",]/g, "")}%`;
+    query = query.or(`name.ilike."${pattern}",description.ilike."${pattern}"`);
+  }
+
+  const { error, data: presets, count } = await query
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(from, to);
+
+  if (presets) {
+    return {
+      presets: presets as unknown as Preset[],
+      totalCount: count ?? presets.length,
+    };
+  }
+
+  throw error ?? new Error("Failed to load presets");
+};
+
+const getPresetAuthors = async (): Promise<PresetAuthor[]> => {
+  const { error, data } = await getSupabase()
+    .from("presets")
+    .select("user_id, user: user_id ( id, username )");
+
+  if (!data) {
+    throw error ?? new Error("Failed to load preset authors");
+  }
+
+  const byId = new Map<string, PresetAuthor>();
+
+  for (const row of data) {
+    if (!row.user_id || byId.has(row.user_id)) continue;
+
+    const profile = Array.isArray(row.user) ? row.user[0] : row.user;
+
+    byId.set(row.user_id, {
+      id: row.user_id,
+      username: profile?.username?.trim() || row.user_id,
+    });
+  }
+
+  return [...byId.values()];
 };
 
 const createPreset = async (presetToInset: Omit<Preset, "id" | "user">) => {
-  const { error, body: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .insert({
       ...presetToInset,
     })
+    .select(PRESET_SELECT)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Failed to create preset");
 };
 
 const updatePreset = async (presetToUpdate: Omit<Preset, "user">) => {
-  const { error, body: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .update({
       ...presetToUpdate,
     })
     .eq("id", presetToUpdate.id)
+    .select(PRESET_SELECT)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Failed to update preset");
 };
 
 const deletePreset = async (presetId: number) => {
-  const { error, data: preset } = await supabaseClient
-    .from<Preset>("presets")
+  const { error, data: preset } = await getSupabase()
+    .from("presets")
     .delete()
     .eq("id", presetId)
+    .select(PRESET_SELECT)
     .single();
 
   if (preset) {
-    return preset;
-  } else {
-    throw error;
+    return preset as unknown as Preset;
   }
+
+  throw error ?? new Error("Failed to delete preset");
 };
 
 export const PresetService = {
   getPresets,
+  getPresetAuthors,
   createPreset,
   getPreset,
   deletePreset,

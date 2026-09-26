@@ -1,10 +1,12 @@
-import { supabaseClient } from "@supabase/supabase-auth-helpers/nextjs";
+import { createClient } from "../utils/supabase/client";
 import { getURL } from "../utils/helpers";
 
 export interface Profile {
   id: string;
   username: string;
 }
+
+const getSupabase = () => createClient();
 
 const signin = async ({
   email,
@@ -13,28 +15,29 @@ const signin = async ({
   email: string;
   password: string;
 }): Promise<Profile> => {
-  const { error, user } = await supabaseClient.auth.signIn(
-    { email, password },
-    { redirectTo: getURL() }
-  );
-  if (user) {
-    const { error, data: profile } = await supabaseClient
-      .from<Profile>("profiles")
-      .select()
-      .eq("id", user.id)
-      .single();
+  const supabase = getSupabase();
+  const { error, data } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (profile) {
-      return profile;
-    } else {
-      throw error;
-    }
-  } else {
-    throw error;
+  if (error || !data.user) {
+    throw error ?? new Error("Sign in failed");
   }
+
+  const { error: profileError, data: profile } = await supabase
+    .from("profiles")
+    .select()
+    .eq("id", data.user.id)
+    .single();
+
+  if (profile) {
+    return profile as Profile;
+  }
+
+  throw profileError ?? new Error("Profile not found");
 };
 
-// https://github.com/supabase/supabase/discussions/3491
 const signup = async ({
   username,
   email,
@@ -44,58 +47,61 @@ const signup = async ({
   email: string;
   password: string;
 }) => {
-  const { error, user: createdUser } = await supabaseClient.auth.signUp(
-    {
-      email,
-      password,
+  const supabase = getSupabase();
+  const { error, data } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { username },
+      emailRedirectTo: getURL(),
     },
-    {
-      data: {
-        username,
-      },
-    }
-  );
-  if (createdUser) {
-    return createdUser;
-  } else {
-    throw error;
+  });
+
+  if (data.user) {
+    return data.user;
   }
+
+  throw error ?? new Error("Sign up failed");
 };
 
 const updateUserProfile = async (
   userId: string,
   { username }: Partial<Profile>
 ): Promise<Profile> => {
-  const { error, body: profile } = await supabaseClient
-    .from<Profile>("profiles")
+  const supabase = getSupabase();
+  const { error, data: profile } = await supabase
+    .from("profiles")
     .update({ username })
     .eq("id", userId)
+    .select()
     .single();
 
   if (profile) {
-    return profile;
-  } else {
-    throw error;
+    return profile as Profile;
   }
+
+  throw error ?? new Error("Failed to update profile");
 };
 
 const getProfile = async (userId: string) => {
-  const { error, body: profile } = await supabaseClient
-    .from<Profile>("profiles")
+  const supabase = getSupabase();
+  const { error, data: profile } = await supabase
+    .from("profiles")
     .select()
     .eq("id", userId)
     .single();
 
   if (profile) {
-    return profile;
-  } else {
-    throw error;
+    return profile as Profile;
   }
+
+  throw error ?? new Error("Profile not found");
 };
 
 const isUsernameAvailable = async (username: string) => {
-  const { body: profiles } = await supabaseClient
-    .from<Profile>("profiles")
+  const supabase = getSupabase();
+  const { data: profiles } = await supabase
+    .from("profiles")
     .select("username")
     .eq("username", username);
 
@@ -103,11 +109,9 @@ const isUsernameAvailable = async (username: string) => {
 };
 
 const logout = async () => {
-  const { error } = await supabaseClient.auth.signOut();
+  const { error } = await getSupabase().auth.signOut();
 
   if (error) {
-    throw error;
-  } else {
     throw error;
   }
 };
@@ -118,4 +122,5 @@ export const UserService = {
   getProfile,
   logout,
   isUsernameAvailable,
+  updateUserProfile,
 };

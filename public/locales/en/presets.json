@@ -7,5 +7,8 @@
   "presets-list-model-filter": "Model",
   "presets-list-model-filter-all": "All models",
   "presets-list-user-filter": "User",
-  "presets-list-user-filter-all": "All users"
+  "presets-list-user-filter-all": "All users",
+  "presets-list-pagination-previous": "Previous",
+  "presets-list-pagination-next": "Next",
+  "presets-list-pagination-status": "Page {{page}} of {{totalPages}} ({{total}} presets)"
 }

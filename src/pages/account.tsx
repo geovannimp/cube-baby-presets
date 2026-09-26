@@ -1,27 +1,45 @@
-import { useMemo } from "react";
-import { GetStaticProps, NextPage } from "next";
+import { useMemo, useState } from "react";
+import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { withPageAuth } from "@supabase/supabase-auth-helpers/nextjs";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
+import { parseAsInteger, useQueryState } from "nuqs";
 
+import { Button } from "@/components/ui/button";
 import { Header } from "../components/Header";
-import { Button } from "../components/Button";
 import { Container } from "../components/Container";
+import { PresetsList } from "../components/PresetsList";
 import { usePresets } from "../hooks/usePresets";
-import LoadingDots from "../components/LoadingDots";
 import { useModels } from "../hooks/useModels";
-import { PresetCard } from "../components/PresetCard";
 import nextI18nextConfig from "../../next-i18next.config";
+import { useUser } from "../hooks/useUser";
+import { createPagesServerClient } from "../utils/supabase/pages";
+import { DEFAULT_PRESETS_PAGE_SIZE } from "../services/presetService";
 
 const Account: NextPage = () => {
   const { t } = useTranslation("account");
   const { user } = useUser();
-  const options = useMemo(() => ({ userId: user?.id }), [user?.id]);
-  const { data: presets, isLoading: isLoadingPresets } = usePresets(options);
   const { data: models, isLoading: isLoadingModels } = useModels();
+  const [asOf] = useState(() => new Date().toISOString());
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true })
+  );
+
+  const options = useMemo(
+    () => ({
+      userId: user?.id,
+      page,
+      pageSize: DEFAULT_PRESETS_PAGE_SIZE,
+      asOf,
+    }),
+    [user?.id, page, asOf]
+  );
+
+  const { data, isLoading: isLoadingPresets } = usePresets(options, {
+    enabled: Boolean(user?.id),
+  });
 
   const isLoading = isLoadingModels || isLoadingPresets;
 
@@ -34,53 +52,55 @@ const Account: NextPage = () => {
 
       <Header />
 
-      <Container className="gap-4 my-8">
-        <div className="flex flex-row justify-between items-center">
-          <p className="font-bold text-2xl">{t("presets-list-title")}</p>
-          <Link href="/presets/new">
-            <Button>
-              <span>{t("presets-list-button")}</span>
-            </Button>
-          </Link>
+      <Container className="my-8 gap-4">
+        <div className="flex flex-row items-center justify-between">
+          <p className="text-2xl font-bold">{t("presets-list-title")}</p>
+          <Button nativeButton={false} render={<Link href="/presets/new" />}>
+            {t("presets-list-button")}
+          </Button>
         </div>
 
-        {isLoading ? (
-          <LoadingDots />
-        ) : presets?.length ? (
-          <div className="mt-4 grid gap-6 md:grid-cols-3 grid-cols-1">
-            {presets?.map((preset) => (
-              <PresetCard
-                key={preset.id}
-                preset={preset}
-                modelName={
-                  models?.find((model) => model.id === preset.model_id)?.name
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-center font-bold text-lg my-6 py-24 border-dashed border-2 rounded w-full">
-            {t("presets-list-empty")}
-          </p>
-        )}
+        <PresetsList
+          presets={data?.presets ?? []}
+          models={models}
+          isLoading={isLoading}
+          page={page}
+          pageSize={DEFAULT_PRESETS_PAGE_SIZE}
+          totalCount={data?.totalCount ?? 0}
+          emptyTitle={t("presets-list-empty")}
+          onPageChange={(nextPage) =>
+            void setPage(nextPage <= 1 ? null : nextPage)
+          }
+        />
       </Container>
     </>
   );
 };
 
-export const getServerSideProps = withPageAuth({
-  redirectTo: "/signin",
-  getServerSideProps: async ({ locale }) => {
-    const translations = await serverSideTranslations(
-      locale!,
-      ["common", "account"],
-      nextI18nextConfig
-    );
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const supabase = createPagesServerClient(ctx);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
+  if (!user) {
     return {
-      props: translations,
+      redirect: {
+        destination: "/signin",
+        permanent: false,
+      },
     };
-  },
-});
+  }
+
+  const translations = await serverSideTranslations(
+    ctx.locale!,
+    ["common", "account", "presets"],
+    nextI18nextConfig
+  );
+
+  return {
+    props: translations,
+  };
+};
 
 export default Account;

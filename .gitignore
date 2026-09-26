@@ -26,6 +26,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
+.env
 .env*.local
 
 # vercel
@@ -41,3 +42,6 @@ deploy/google-credentials.json
 
 # translation backups
 /public/locales/**/*_old.json
+
+# agent scratch docs
+/docs/superpowers

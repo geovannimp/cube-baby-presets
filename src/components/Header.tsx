@@ -1,54 +1,77 @@
-import { Disclosure, Popover } from "@headlessui/react";
-import { useUser } from "@supabase/supabase-auth-helpers/react";
-import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
-import { useProfile } from "../hooks/useProfile";
-import { UserService } from "../services/userService";
-import { Button } from "./Button";
-import { Container } from "./Container";
-import { useFloating, shift, offset } from "@floating-ui/react-dom";
+import { useTranslation } from "next-i18next";
 import { useTheme } from "next-themes";
 import {
-  ArrowLeftOnRectangleIcon,
-  IdentificationIcon,
-  SwatchIcon,
+  IdCardIcon,
+  LogOutIcon,
+  PaletteIcon,
   UserIcon,
-} from "@heroicons/react/20/solid";
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
-const CustomLink = React.forwardRef<
-  HTMLAnchorElement,
-  React.ComponentProps<"a">
->(function CustomLinkForwarder(props, ref) {
-  let { href, children, ...rest } = props;
-  return (
-    <Link href={href as string}>
-      <a ref={ref} {...rest}>
-        {children}
-      </a>
-    </Link>
-  );
-});
+import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useProfile } from "../hooks/useProfile";
+import { useUser } from "../hooks/useUser";
+import { UserService } from "../services/userService";
+import { Container } from "./Container";
+import { Logo } from "./Logo";
+
+const useScrolledPast = (offset: number) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      setIsScrolled(window.scrollY > offset);
+    };
+
+    const handleScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [offset]);
+
+  return isScrolled;
+};
 
 export const Header = () => {
   const { t } = useTranslation();
   const { user } = useUser();
   const router = useRouter();
-
   const { setTheme } = useTheme();
+  const { data: profile, isLoading: isProfileLoading } = useProfile(user?.id);
+  const isScrolled = useScrolledPast(8);
 
-  const { data: profile } = useProfile(user?.id);
-
-  const { x, y, reference, floating, strategy } = useFloating({
-    strategy: "fixed",
-    middleware: [
-      shift({
-        padding: 8,
-      }),
-      offset(12),
-    ],
-  });
+  const isHome = router.pathname === "/";
+  const isPresets = router.pathname.startsWith("/presets");
 
   const logout = () => {
     UserService.logout().then(() => {
@@ -57,107 +80,112 @@ export const Header = () => {
   };
 
   return (
-    <nav className="flex justify-center bg-white shadow dark:bg-gray-800 w-full">
-      <Container className="my-4">
-        <div className="md:flex md:items-center md:justify-between">
-          <div className="flex items-center justify-between">
-            <div className="text-xl font-semibold text-gray-700">
-              <Link href="/">
-                <p className="text-2xl font-bold cursor-pointer text-gray-800 transition-colors duration-200 transform dark:text-white hover:text-gray-700 dark:hover:text-gray-300">
-                  Cube Baby Presets
-                </p>
-              </Link>
-            </div>
+    <header
+      data-scrolled={isScrolled || undefined}
+      className="sticky top-0 z-20 flex w-full justify-center transition-[background-color,box-shadow] duration-200 ease-out data-[scrolled]:bg-background/85 data-[scrolled]:shadow-[inset_0_-1px_0_var(--border)] supports-[backdrop-filter]:data-[scrolled]:bg-background/65 supports-[backdrop-filter]:data-[scrolled]:backdrop-blur-md"
+    >
+      <Container className="py-3">
+        <nav
+          className="flex items-center justify-between gap-3"
+          aria-label={t("nav-aria-label")}
+        >
+          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+            <Link
+              href="/"
+              aria-current={isHome ? "page" : undefined}
+              className="shrink-0 text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
+              <Logo className="w-20" />
+            </Link>
+
+            <NavigationMenu className="flex-none">
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    active={isPresets}
+                    render={<Link href="/presets" />}
+                    className={navigationMenuTriggerStyle({
+                      className:
+                        "text-muted-foreground hover:text-foreground data-active:bg-muted data-active:text-foreground",
+                    })}
+                  >
+                    {t("nav-presets-button")}
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
 
-          <div className="flex-1 flex items-center justify-between mt-2 md:mt-0">
-            <div className="flex flex-col md:flex-row md:items-center md:mx-8">
-              <Link href="/presets">
-                <p className="px-2 py-1 text-sm font-medium text-gray-700 transition-colors duration-200 transform rounded-md md:mt-0 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer">
-                  Presets
-                </p>
-              </Link>
-            </div>
-            <div className="flex items-center">
-              {user ? (
-                <Popover className="relative inline-block text-left">
-                  <Popover.Button
-                    ref={reference}
-                    className="inline-flex w-full justify-center rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-                  >
-                    {profile?.username ?? "Loading..."}
-                  </Popover.Button>
-
-                  <Popover.Panel
-                    className="w-56 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-400 ring-black ring-opacity-5 shadow-xl focus:outline-none z-50"
-                    ref={floating}
-                    style={{
-                      position: strategy,
-                      top: y ?? 0,
-                      left: x ?? 0,
-                    }}
-                  >
-                    <CustomLink href="/account">
-                      <button className="my-1 flex w-full items-center pl-4 py-2 text-sm hover:bg-gray-700 hover:text-gray-300">
-                        <UserIcon className="w-4 h-4 mr-2" />
-                        {t("account-button")}
-                      </button>
-                    </CustomLink>
-                    <CustomLink href={`/profile/${user.id}`}>
-                      <button className="my-1 flex w-full items-center pl-4 py-2 text-sm hover:bg-gray-700 hover:text-gray-300">
-                        <IdentificationIcon className="w-4 h-4 mr-2" />
-                        {t("profile-button")}
-                      </button>
-                    </CustomLink>
-                    <Disclosure>
-                      <Disclosure.Button
-                        as="button"
-                        className="my-1 flex w-full items-center pl-4 py-2 text-sm hover:bg-gray-700 hover:text-gray-300"
-                      >
-                        <>
-                          <SwatchIcon className="w-4 h-4 mr-2" />
-                          {t("theme-button")}
-                        </>
-                      </Disclosure.Button>
-                      <Disclosure.Panel className="text-gray-600 dark:text-gray-400">
-                        <button
-                          onClick={() => setTheme("dark")}
-                          className="my-1 flex w-full items-center pl-10 py-2 text-sm hover:bg-gray-700 hover:text-gray-300"
-                        >
-                          {t("theme-dark-button")}
-                        </button>
-                        <button
-                          onClick={() => setTheme("light")}
-                          className="my-1 flex w-full items-center pl-10 py-2 text-sm hover:bg-gray-700 hover:text-gray-300"
-                        >
-                          {t("theme-light-button")}
-                        </button>
-                        <button
-                          onClick={() => setTheme("system")}
-                          className="my-1 flex w-full items-center pl-10 py-2 text-sm hover:bg-gray-700 hover:text-gray-300"
-                        >
-                          {t("theme-system-button")}
-                        </button>
-                      </Disclosure.Panel>
-                    </Disclosure>
-                    <button
-                      onClick={logout}
-                      className="my-1 flex w-full items-center pl-4 py-2 text-sm hover:bg-gray-700 hover:text-gray-300"
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="secondary"
+                      className="min-h-9 max-w-24 sm:max-w-36"
+                      aria-busy={isProfileLoading || undefined}
+                    />
+                  }
+                >
+                  <span className="truncate" title={profile?.username}>
+                    {profile?.username ??
+                      (isProfileLoading ? "…" : t("account-button"))}
+                  </span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      nativeButton={false}
+                      render={<Link href="/account" />}
                     >
-                      <ArrowLeftOnRectangleIcon className="w-4 h-4 mr-2" />
+                      <UserIcon data-icon="inline-start" />
+                      {t("account-button")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      nativeButton={false}
+                      render={<Link href={`/profile/${user.id}`} />}
+                    >
+                      <IdCardIcon data-icon="inline-start" />
+                      {t("profile-button")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <PaletteIcon data-icon="inline-start" />
+                        {t("theme-button")}
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuItem onClick={() => setTheme("dark")}>
+                          {t("theme-dark-button")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTheme("light")}>
+                          {t("theme-light-button")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTheme("system")}>
+                          {t("theme-system-button")}
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOutIcon data-icon="inline-start" />
                       {t("logout-button")}
-                    </button>
-                  </Popover.Panel>
-                </Popover>
-              ) : (
-                <Link href="/signin">
-                  <Button>{t("login-button")}</Button>
-                </Link>
-              )}
-            </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="outline"
+                className="min-h-9"
+                nativeButton={false}
+                render={<Link href="/signin" />}
+              >
+                {t("login-button")}
+              </Button>
+            )}
           </div>
-        </div>
+        </nav>
       </Container>
-    </nav>
+    </header>
   );
 };
