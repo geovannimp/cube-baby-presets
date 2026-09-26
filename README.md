@@ -1,32 +1,113 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Cube Baby Presets
 
-## Getting Started
+A Next.js app for sharing Tonex Studio pedal presets.
 
-First, run the development server:
+## Requirements
+
+- Node.js >= 20.9.0, npm >= 10 (see `engines` in `package.json`)
+- Supabase CLI 2.118.0 — invoked through the `db:*` scripts, so no global install
+- Docker — only needed for the local Supabase stack (`npm run db:start`)
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env.local
+npm run db:start          # boots Postgres, GoTrue, PostgREST + Studio via Docker
+```
+
+`db:start` applies every migration in `supabase/migrations/` and then
+`supabase/seed.sql`. When it finishes, run:
+
+```bash
+npm run db:status
+```
+
+Copy the **API URL** and **anon key** it prints into `.env.local` (they default
+to the placeholder values already in `.env.example`), then:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app is at [http://localhost:3000](http://localhost:3000), Supabase Studio at
+[http://127.0.0.1:54323](http://127.0.0.1:54323), and the local email catcher
+(which intercepts confirmation emails instead of sending them) at
+[http://127.0.0.1:54324](http://127.0.0.1:54324).
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+`supabase/config.toml` already sets `auth.site_url` and
+`auth.additional_redirect_urls` to `http://localhost:3000` to match
+`getURL()` in `src/utils/helpers.ts`. If you serve the app on a different port,
+change both.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### Using a hosted Supabase project instead
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+If you don't have Docker, point the app at a real project instead:
 
-## Learn More
+```bash
+npx supabase login                                   # once per machine
+npx supabase link --project-ref <ref>                # prompts for the DB password
+npx supabase db push                                 # applies supabase/migrations/*
+```
 
-To learn more about Next.js, take a look at the following resources:
+Then set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in
+`.env.local` from Project Settings → API. On a hosted project, also add your
+deploy URL to Authentication → URL Configuration → Redirect URLs, otherwise the
+PKCE callback in `src/pages/api/auth/callback.ts` is rejected.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database workflow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+`supabase/migrations/*.sql` is the source of truth. The hosted project is a
+deployment target, not the place to edit schema by hand.
 
-## Deploy on Vercel
+| Command | What it does |
+| --- | --- |
+| `npm run db:start` | Start the local stack, applying all migrations + seed |
+| `npm run db:stop` | Stop the local stack |
+| `npm run db:status` | Print local credentials and service status |
+| `npm run db:reset` | Drop and rebuild the local DB from migrations + seed |
+| `npm run db:link` | Link this directory to a hosted project |
+| `npm run db:diff -f <name>` | Generate a migration by diffing local vs. linked |
+| `npm run db:push` | Apply pending migrations to the linked project |
+| `npm run db:pull` | Pull the linked project's current schema into a new migration |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Changing the schema
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```bash
+npm run db:diff -f add_preset_favorites   # writes supabase/migrations/<ts>_add_preset_favorites.sql
+# review the SQL, then:
+npm run db:push                           # apply to the linked project
+```
+
+`db:diff` compares the local DB against the linked one, so keep the local stack
+running. Commit the generated migration in the same PR as the code that needs it.
+
+### Schema changes and RLS
+
+All data access in this app goes through the browser with the anon key
+(`src/utils/supabase/client.ts`), so **RLS is the only security boundary** — there
+is no server-side layer filtering rows. Before tightening any policy, check
+these call sites, which intentionally read across users:
+
+- `getPresetAuthors` (`src/services/presetService.ts`) selects
+  `user_id, user: user_id (id, username)` from `presets` with no filter, to
+  populate the author filter on the presets page.
+- `getPresets` with no `userId` returns every preset, newest first.
+- `createPreset` / `updatePreset` / `deletePreset` do
+  `.insert().select(...).single()`, so the returning clause re-reads `profiles`
+  through the `presets.user_id` FK in the same request. If `profiles` isn't
+  SELECT-able by the inserting role, writes fail even though the insert itself
+  is permitted.
+
+Signups pass `username` as signup metadata
+(`options.data.username` in `src/services/userService.ts`), so a database
+trigger must copy it from `raw_user_meta_data` into `profiles` on
+`auth.users` insert. Without that trigger every new signup fails its profile
+lookup. It is included in the migrations.
+
+## Deploying to Vercel
+
+Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as project
+environment variables, and add the Vercel domain to the Supabase redirect URL
+allowlist. Then apply migrations from CI or a local machine with
+`npm run db:push` — Vercel does not run them.

@@ -1,0 +1,15 @@
+-- Seed data applied by `npm run db:reset` / `supabase db reset` after migrations.
+-- Reference: supabase/config.toml -> [db.seed]
+--
+-- No seed data is required today: the pedal models and their knob ranges are
+-- hardcoded in src/services/modelService.ts, so the database only holds user
+-- data (auth.users, profiles, presets).
+--
+-- When you need fixtures (e.g. to exercise pagination in presets/index.tsx),
+-- insert them below. They are wiped on every `db reset`, so keep anything
+-- here disposable and never put real user data in this file.
+--
+-- Note: presets.user_id references auth.users(id), so a seeded preset needs a
+-- matching auth user first. Easiest path is to sign up through the app with
+-- the local stack's email catcher (http://127.0.0.1:54324) and then copy the
+-- id, rather than hand-inserting into auth.users.
