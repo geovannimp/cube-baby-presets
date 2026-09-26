@@ -7,8 +7,14 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ExternalLinkIcon, PencilIcon, UserCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import nextI18nextConfig from "../../../../next-i18next.config";
@@ -192,6 +198,40 @@ const PresetDetails: NextPage = () => {
                 </p>
               ) : null}
 
+              {customIR?.url ? (
+                <Alert className="w-full">
+                  <AlertTitle>{t("preset-detail-custom-ir-title")}</AlertTitle>
+                  <AlertDescription>
+                    <a
+                      href={customIR.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={customIR.url}
+                      className="inline-flex min-w-0 flex-1 items-center gap-1.5 font-medium text-primary underline underline-offset-4"
+                    >
+                      <span className="truncate">{customIR.url}</span>
+                      <ExternalLinkIcon
+                        className="size-3.5 shrink-0"
+                        aria-hidden
+                      />
+                    </a>
+                  </AlertDescription>
+                  <AlertAction>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Separator orientation="vertical" className="h-8" />
+                      <span className="flex flex-1 flex-col items-end justify-between">
+                        <span className="font-bold">
+                          {t("preset-detail-custom-ir-distance-label")}
+                        </span>
+                        <span className="text-sm font-semibold tabular-nums">
+                          {customIR.distance}
+                        </span>
+                      </span>
+                    </div>
+                  </AlertAction>
+                </Alert>
+              ) : null}
+
               {model ? (
                 <KnobsPanel
                   model={model}
@@ -213,30 +253,6 @@ const PresetDetails: NextPage = () => {
                     )}
                   </dl>
                 </KnobsPanel>
-              ) : null}
-
-              {customIR?.url ? (
-                <Card size="sm">
-                  <CardHeader>
-                    <CardTitle>{t("preset-detail-custom-ir-title")}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-1">
-                    <a
-                      href={customIR.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 font-medium break-all text-primary underline underline-offset-4"
-                    >
-                      {customIR.url}
-                      <ExternalLinkIcon className="size-3.5 shrink-0" aria-hidden />
-                    </a>
-                    <p className="text-sm text-muted-foreground">
-                      {t("preset-detail-custom-ir-distance", {
-                        distance: customIR.distance,
-                      })}
-                    </p>
-                  </CardContent>
-                </Card>
               ) : null}
             </div>
           )}

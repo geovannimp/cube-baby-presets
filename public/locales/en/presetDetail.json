@@ -1,7 +1,7 @@
 {
   "preset-detail-edit-button": "Edit preset",
   "preset-detail-custom-ir-title": "Custom IR",
-  "preset-detail-custom-ir-distance": "Distance: {{distance}}",
+  "preset-detail-custom-ir-distance-label": "Distance",
   "preset-vote-own-preset-hint": "Votes on your own preset come from other people.",
   "preset-vote-your-vote": "Your vote:",
   "preset-vote-signin-action": "Sign in to vote",
