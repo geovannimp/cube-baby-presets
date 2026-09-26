@@ -123,18 +123,14 @@ const Presets: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_10%_0%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(ellipse_60%_40%_at_95%_30%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]" />
+        <div className="absolute -top-32 right-[-12%] size-[min(36rem,85vw)] rounded-full bg-primary/10 blur-3xl" />
+      </div>
+
       <Header />
 
       <main className="relative flex w-full flex-1 flex-col items-center overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_10%_0%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(ellipse_60%_40%_at_95%_30%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-32 right-[-12%] size-[min(36rem,85vw)] rounded-full bg-primary/10 blur-3xl"
-        />
-
         <Container className="relative z-10 my-10 w-full gap-10 py-4 md:my-14 md:py-6">
           <div className="animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-700 ease-out motion-reduce:animate-none">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">

@@ -8,9 +8,16 @@ import {
   PaletteIcon,
   UserIcon,
 } from "lucide-react";
-import clsx from "clsx";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,12 +34,41 @@ import { UserService } from "../services/userService";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 
+const useScrolledPast = (offset: number) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      setIsScrolled(window.scrollY > offset);
+    };
+
+    const handleScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [offset]);
+
+  return isScrolled;
+};
+
 export const Header = () => {
   const { t } = useTranslation();
   const { user } = useUser();
   const router = useRouter();
   const { setTheme } = useTheme();
   const { data: profile, isLoading: isProfileLoading } = useProfile(user?.id);
+  const isScrolled = useScrolledPast(8);
 
   const isHome = router.pathname === "/";
   const isPresets = router.pathname.startsWith("/presets");
@@ -44,47 +80,58 @@ export const Header = () => {
   };
 
   return (
-    <header className="flex w-full justify-center border-b bg-background">
+    <header
+      data-scrolled={isScrolled || undefined}
+      className="sticky top-0 z-20 flex w-full justify-center transition-[background-color,box-shadow] duration-200 ease-out data-[scrolled]:bg-background/85 data-[scrolled]:shadow-[inset_0_-1px_0_var(--border)] supports-[backdrop-filter]:data-[scrolled]:bg-background/65 supports-[backdrop-filter]:data-[scrolled]:backdrop-blur-md"
+    >
       <Container className="py-3">
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/"
-            aria-current={isHome ? "page" : undefined}
-            className="shrink-0 text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-          >
-            <Logo className="w-20" />
-          </Link>
-
-          <nav
-            className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2"
-            aria-label={t("nav-aria-label")}
-          >
+        <nav
+          className="flex items-center justify-between gap-3"
+          aria-label={t("nav-aria-label")}
+        >
+          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
             <Link
-              href="/presets"
-              aria-current={isPresets ? "page" : undefined}
-              className={clsx(
-                "inline-flex min-h-9 items-center rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-                isPresets
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
+              href="/"
+              aria-current={isHome ? "page" : undefined}
+              className="shrink-0 text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              {t("nav-presets-button")}
+              <Logo className="w-20" />
             </Link>
 
+            <NavigationMenu className="flex-none">
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    active={isPresets}
+                    render={<Link href="/presets" />}
+                    className={navigationMenuTriggerStyle({
+                      className:
+                        "text-muted-foreground hover:text-foreground data-active:bg-muted data-active:text-foreground",
+                    })}
+                  >
+                    {t("nav-presets-button")}
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
                     <Button
                       variant="secondary"
-                      className="min-h-9"
+                      className="min-h-9 max-w-24 sm:max-w-36"
                       aria-busy={isProfileLoading || undefined}
                     />
                   }
                 >
-                  {profile?.username ??
-                    (isProfileLoading ? "…" : t("account-button"))}
+                  <span className="truncate" title={profile?.username}>
+                    {profile?.username ??
+                      (isProfileLoading ? "…" : t("account-button"))}
+                  </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuGroup>
@@ -136,8 +183,8 @@ export const Header = () => {
                 {t("login-button")}
               </Button>
             )}
-          </nav>
-        </div>
+          </div>
+        </nav>
       </Container>
     </header>
   );
