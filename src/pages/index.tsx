@@ -36,18 +36,14 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_10%_20%,color-mix(in_oklch,var(--primary)_28%,transparent),transparent_55%),radial-gradient(ellipse_70%_50%_at_90%_80%,color-mix(in_oklch,var(--primary)_16%,transparent),transparent_50%)]" />
+        <div className="absolute -top-24 right-[-10%] size-[min(42rem,90vw)] rounded-full bg-primary/10 blur-3xl" />
+      </div>
+
       <Header />
 
       <main className="relative flex w-full flex-1 flex-col items-center overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_10%_20%,color-mix(in_oklch,var(--primary)_28%,transparent),transparent_55%),radial-gradient(ellipse_70%_50%_at_90%_80%,color-mix(in_oklch,var(--primary)_16%,transparent),transparent_50%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 right-[-10%] size-[min(42rem,90vw)] rounded-full bg-primary/10 blur-3xl"
-        />
-
         <Container className="relative z-10 flex min-h-[calc(100svh-4.5rem)] w-full flex-col justify-center py-16 md:py-24">
           <div className="animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-700 ease-out motion-reduce:animate-none">
             <div className="max-w-3xl">
