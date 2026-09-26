@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Logo } from "./Logo";
 
 type AuthShellProps = {
   title: string;
@@ -64,14 +65,14 @@ export const AuthShell = ({ title, children, footer }: AuthShellProps) => {
         <div className="relative z-10 flex h-full flex-col justify-between px-10 py-12 xl:px-14 xl:py-14">
           <Link
             href="/"
-            className="font-heading text-lg font-bold tracking-[-0.02em] text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
-            Cube Baby Presets
+            <Logo className="w-20" />
           </Link>
 
           <div className="animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-700 ease-out motion-reduce:animate-none">
-            <p className="font-heading max-w-[10ch] text-5xl leading-[1.02] font-bold tracking-[-0.03em] text-foreground xl:text-[3.75rem]">
-              Cube Baby Presets
+            <p className="text-foreground">
+              <Logo className="w-48 xl:w-64" />
             </p>
             <p className="mt-6 max-w-[26rem] text-base leading-relaxed text-muted-foreground xl:text-lg">
               {t("project-description")}
@@ -97,9 +98,9 @@ export const AuthShell = ({ title, children, footer }: AuthShellProps) => {
           <div className="mx-auto w-full max-w-[22rem] animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-700 ease-out motion-reduce:animate-none">
             <Link
               href="/"
-              className="mb-10 inline-block font-heading text-lg font-bold tracking-[-0.02em] text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none lg:hidden"
+              className="mb-10 inline-block text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none lg:hidden"
             >
-              Cube Baby Presets
+              <Logo className="w-20" />
             </Link>
 
             <h1 className="font-heading text-[2rem] leading-tight font-bold tracking-[-0.03em] text-foreground sm:text-3xl">

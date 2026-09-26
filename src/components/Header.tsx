@@ -25,6 +25,7 @@ import { useProfile } from "../hooks/useProfile";
 import { useUser } from "../hooks/useUser";
 import { UserService } from "../services/userService";
 import { Container } from "./Container";
+import { Logo } from "./Logo";
 
 export const Header = () => {
   const { t } = useTranslation();
@@ -49,9 +50,9 @@ export const Header = () => {
           <Link
             href="/"
             aria-current={isHome ? "page" : undefined}
-            className="shrink-0 text-xl font-bold text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="shrink-0 text-foreground transition-colors hover:text-muted-foreground focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
-            Cube Baby Presets
+            <Logo className="w-20" />
           </Link>
 
           <nav
