@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import nextI18nextConfig from "../../../../next-i18next.config";
 import { Container } from "../../../components/Container";
 import { Header } from "../../../components/Header";
+import { KnobField } from "../../../components/KnobField";
 import { KnobsPanel } from "../../../components/KnobsPanel";
 import { PresetNotFound } from "../../../components/PresetNotFound";
 import { VoteButtons } from "../../../components/VoteButtons";
@@ -197,20 +198,19 @@ const PresetDetails: NextPage = () => {
                   knobValues={knobValues}
                   title={tCommon("knob-values-title")}
                 >
-                  <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 md:grid-cols-3">
-                    {Object.entries(model.knobs).map(([knobName]) => (
-                      <div
-                        key={`knob-value-${model.id}-${knobName}`}
-                        className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 px-3.5 py-2.5"
-                      >
-                        <dt className="truncate text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                          {knobName.replaceAll("_", " ")}
-                        </dt>
-                        <dd className="text-sm font-semibold tabular-nums">
-                          {knobValues[knobName] ?? 0}
-                        </dd>
-                      </div>
-                    ))}
+                  <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 md:grid-cols-3">
+                    {Object.entries(model.knobs).map(
+                      ([knobName, [minValue, maxValue]]) => (
+                        <KnobField
+                          key={`knob-value-${model.id}-${knobName}`}
+                          readOnly
+                          label={knobName.replaceAll("_", " ")}
+                          value={knobValues[knobName] ?? 0}
+                          min={minValue}
+                          max={maxValue}
+                        />
+                      )
+                    )}
                   </dl>
                 </KnobsPanel>
               ) : null}
