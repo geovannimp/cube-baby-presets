@@ -207,11 +207,16 @@ const PresetDetails: NextPage = () => {
                       target="_blank"
                       rel="noreferrer"
                       title={customIR.url}
-                      className="inline-flex min-w-0 flex-1 items-center gap-1.5 font-medium text-primary underline underline-offset-4"
+                      className="flex min-w-0 items-start gap-1.5 font-medium text-primary underline underline-offset-4"
                     >
-                      <span className="truncate">{customIR.url}</span>
+                      {/* `flex-1` only bounds the width inside a flex row, and
+                          `break-all` wraps the URL instead of letting it
+                          overflow on narrow screens. */}
+                      <span className="min-w-0 flex-1 break-all">
+                        {customIR.url}
+                      </span>
                       <ExternalLinkIcon
-                        className="size-3.5 shrink-0"
+                        className="mt-0.5 size-3.5 shrink-0"
                         aria-hidden
                       />
                     </a>
