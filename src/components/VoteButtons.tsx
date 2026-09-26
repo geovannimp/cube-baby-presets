@@ -54,7 +54,7 @@ export const VoteButtons = ({
           return (
             <Button
               key={option}
-              // Renders inside the preset form on the preset page: never submit.
+              // The details page has no form, but never let a click submit one.
               type="button"
               variant="outline"
               aria-pressed={isActive}

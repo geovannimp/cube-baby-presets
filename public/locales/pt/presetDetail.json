@@ -1,0 +1,11 @@
+{
+  "preset-detail-edit-button": "Editar preset",
+  "preset-detail-custom-ir-title": "IR Personalizado",
+  "preset-detail-custom-ir-distance-label": "Distância",
+  "preset-vote-own-preset-hint": "Os votos no seu próprio preset vêm de outras pessoas.",
+  "preset-vote-your-vote": "Seu voto:",
+  "preset-vote-signin-action": "Entrar para votar",
+  "preset-vote-saved-message": "Voto salvo",
+  "preset-vote-removed-message": "Voto removido",
+  "preset-vote-error-message": "Não foi possível salvar seu voto"
+}

@@ -8,7 +8,8 @@ const KNOBS_WITH_TICK = ["ir_cab", "type"];
 interface PedalProps {
   model: Model;
   knobValues: Record<string, number>;
-  onChange: (newValue: Record<string, number>) => void;
+  /** Omitted to render the pedal as a read-only preview. */
+  onChange?: (newValue: Record<string, number>) => void;
   disabled?: boolean;
 }
 
@@ -73,7 +74,7 @@ export const Pedal = ({
                   max={maxValue}
                   value={knobValues[knobName] ?? 0}
                   onChange={(newValue) =>
-                    onChange({ ...knobValues, [knobName]: newValue })
+                    onChange?.({ ...knobValues, [knobName]: newValue })
                   }
                   disabled={disabled}
                 />
