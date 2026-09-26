@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Preset } from "../services/presetService";
+import { VoteTally } from "./VoteTally";
 
 interface PresetCardProps {
   preset: Preset;
@@ -73,6 +74,13 @@ export const PresetCard = ({ preset, modelName }: PresetCardProps) => {
             <span className="truncate">{username}</span>
           </Link>
         ) : null}
+
+        <div className="flex min-h-6 items-center">
+          <VoteTally
+            upCount={preset.vote_up_count}
+            downCount={preset.vote_down_count}
+          />
+        </div>
       </CardContent>
 
       <CardFooter className="mt-auto p-0">

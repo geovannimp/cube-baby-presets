@@ -3,6 +3,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -28,10 +29,15 @@ import { useAppForm } from "../../hooks/form";
 import { useModels } from "../../hooks/useModels";
 import nextI18nextConfig from "../../../next-i18next.config";
 import { presetFormOpts } from "../../hooks/presetFormOptions";
+import { VoteButtons } from "../../components/VoteButtons";
+import { VoteTally } from "../../components/VoteTally";
 import { usePresetFormSchema } from "../../hooks/usePresetFormSchema";
 import { usePreset } from "../../hooks/usePreset";
 import { useUpdatePreset } from "../../hooks/useUpdatePreset";
 import { useCreatePreset } from "../../hooks/useCreatePreset";
+import { useMyVote } from "../../hooks/useMyVote";
+import { useVotePreset } from "../../hooks/useVotePreset";
+import type { VoteValue } from "../../services/voteService";
 import { fieldErrorMessage } from "../../utils/fieldErrorMessage";
 
 const NewPreset: NextPage = () => {
@@ -46,6 +52,12 @@ const NewPreset: NextPage = () => {
   const { data: models } = useModels();
   const { mutateAsync: createPreset } = useCreatePreset();
   const { mutateAsync: updatePreset } = useUpdatePreset();
+
+  const { data: myVote } = useMyVote(preset?.id, user?.id);
+  const { vote, remove, isPending: isVoting } = useVotePreset();
+
+  // Voting on your own preset is rejected by the preset_votes RLS policies.
+  const isPresetOwner = !!preset && !!user && preset.user_id === user.id;
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -142,6 +154,27 @@ const NewPreset: NextPage = () => {
     );
   };
 
+  const handleVote = (value: VoteValue) => {
+    if (!user?.id || !preset) return;
+
+    vote(
+      { presetId: preset.id, userId: user.id, value },
+      {
+        onSuccess: () => toast.success(t("preset-vote-saved-message")),
+        onError: () => toast.error(t("preset-vote-error-message")),
+      }
+    );
+  };
+
+  const handleClearVote = () => {
+    if (!preset) return;
+
+    remove(preset.id, {
+      onSuccess: () => toast.success(t("preset-vote-removed-message")),
+      onError: () => toast.error(t("preset-vote-error-message")),
+    });
+  };
+
   return (
     <>
       <Head>
@@ -175,6 +208,49 @@ const NewPreset: NextPage = () => {
                 <h1 className="font-heading max-w-[18ch] text-4xl leading-[1.05] font-bold tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
                   {title}
                 </h1>
+
+                {preset ? (
+                  <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/40 p-5">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                      <p className="text-sm font-semibold">
+                        {t("preset-vote-title")}
+                      </p>
+                      <VoteTally
+                        upCount={preset.vote_up_count}
+                        downCount={preset.vote_down_count}
+                      />
+                    </div>
+                    {isPresetOwner ? (
+                      <p className="text-sm text-muted-foreground">
+                        {t("preset-vote-own-preset-hint")}
+                      </p>
+                    ) : user ? (
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          {t("preset-vote-your-vote")}
+                        </p>
+                        <VoteButtons
+                          value={myVote?.value ?? 0}
+                          upCount={preset.vote_up_count}
+                          downCount={preset.vote_down_count}
+                          onVote={handleVote}
+                          onClear={handleClearVote}
+                          disabled={isVoting}
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        {t("preset-vote-signin-hint")}{" "}
+                        <Link
+                          href="/signin"
+                          className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+                        >
+                          {t("preset-vote-signin-link")}
+                        </Link>
+                      </p>
+                    )}
+                  </div>
+                ) : null}
 
                 <FieldGroup className="gap-6">
                   <form.Field name="name">

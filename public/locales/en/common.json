@@ -14,5 +14,11 @@
   "go-to-presets-button": "Browse presets",
   "home-see-more-button": "See more",
   "home-presets-empty": "No presets yet",
-  "home-latest-presets-title": "Latest presets"
+  "home-latest-presets-title": "Latest presets",
+  "vote-tally-no-votes": "No votes yet",
+  "vote-tally-aria": "{{upCount}} likes, {{downCount}} dislikes",
+  "vote-button-like": "Like",
+  "vote-group-aria": "Vote on this preset",
+  "vote-button-dislike": "Dislike",
+  "vote-toggle-hint": "Click again to undo your vote"
 }

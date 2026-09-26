@@ -115,6 +115,22 @@ trigger must copy it from `raw_user_meta_data` into `profiles` on
 `auth.users` insert. Without that trigger every new signup fails its profile
 lookup. It is included in the migrations.
 
+Preset votes are denormalised: `presets.vote_up_count`, `presets.vote_down_count`
+and `presets.vote_score` (likes - dislikes) are maintained by the
+`on_preset_vote_sync_tallies` trigger from
+`supabase/migrations/20260926120000_preset_votes.sql`, so the presets list can
+sort by them in a single request. `vote_score` is a materialised column because
+PostgREST cannot `order` by an expression. That trigger is `SECURITY DEFINER` on
+purpose — the tally write targets `presets`, whose RLS only lets the owner edit a
+row, while the vote belongs to whoever cast it. Dropping the definer right makes
+every vote on someone else's preset fail to save.
+
+The `preset_votes` insert/update policies also reject votes on the voter's
+own presets, so self-approval is impossible even with a hand-rolled REST
+call — the browser talks to PostgREST with the anon key, so the policy is
+the only place that rule can be enforced. Withdraw (`DELETE`) stays
+unrestricted so nobody is stuck with a vote they cannot take back.
+
 ## Deploying to Vercel
 
 Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as project

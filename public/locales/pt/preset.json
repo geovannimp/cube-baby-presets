@@ -20,5 +20,13 @@
   "custom-ir-distance-field": "Distância",
   "preset-submit-button_creating": "Criar",
   "preset-submit-button_editing": "Salvar",
-  "preset-delete-button": "Excluir"
+  "preset-delete-button": "Excluir",
+  "preset-vote-title": "Votos",
+  "preset-vote-own-preset-hint": "Os votos no seu próprio preset vêm de outras pessoas.",
+  "preset-vote-your-vote": "Seu voto:",
+  "preset-vote-signin-hint": "Entre para votar neste preset:",
+  "preset-vote-signin-link": "Entrar",
+  "preset-vote-saved-message": "Voto salvo",
+  "preset-vote-removed-message": "Voto removido",
+  "preset-vote-error-message": "Não foi possível salvar seu voto"
 }
