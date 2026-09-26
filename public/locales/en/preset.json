@@ -11,7 +11,6 @@
   "knob-field-out-of-range": "{{knob}} must be between {{knobMin}} and {{knobMax}}",
   "preset-title_creating": "New preset",
   "preset-title_editing": "Edit preset",
-  "preset-title_viewing": "View preset",
   "submit-success-message": "Successfully saved preset",
   "name-field": "Name",
   "description-field": "Description",
@@ -20,13 +19,5 @@
   "custom-ir-distance-field": "Distance",
   "preset-submit-button_creating": "Create",
   "preset-submit-button_editing": "Save",
-  "preset-delete-button": "Delete",
-  "preset-vote-title": "Votes",
-  "preset-vote-own-preset-hint": "Votes on your own preset come from other people.",
-  "preset-vote-your-vote": "Your vote:",
-  "preset-vote-signin-hint": "Sign in to vote on this preset:",
-  "preset-vote-signin-link": "Sign in",
-  "preset-vote-saved-message": "Vote saved",
-  "preset-vote-removed-message": "Vote removed",
-  "preset-vote-error-message": "Could not save your vote"
+  "preset-delete-button": "Delete"
 }

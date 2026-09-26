@@ -1,45 +1,39 @@
 import clsx from "clsx";
+import { useTranslation } from "next-i18next";
 
 import { withForm } from "../hooks/form";
 import { presetFormOpts } from "../hooks/presetFormOptions";
 import type { Model } from "../services/modelService";
 import { fieldErrorMessage } from "../utils/fieldErrorMessage";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
-import { Pedal } from "./Pedal";
+import { KnobsPanel } from "./KnobsPanel";
 
 export const KnobsForm = withForm({
   ...presetFormOpts,
   props: {
     model: undefined! as Model,
-    disabled: false,
-    disableIR: false as boolean | undefined,
+  } as {
+    model: Model;
+    /** Greys out the cab knob when a custom IR replaces it. */
+    disableIR?: boolean;
   },
-  render: function Render({ form, model, disabled = false, disableIR }) {
+  render: function Render({ form, model, disableIR }) {
+    const { t } = useTranslation();
+
     return (
       <form.Subscribe selector={(state) => state.values.knobValues}>
         {(knobValues) =>
           knobValues ? (
-            <Card className="w-full gap-0 overflow-hidden py-0" size="sm">
-              <div className="overflow-x-auto md:px-3 md:pt-3 md:pb-3">
-                <div className="flex min-w-min justify-center">
-                  <Pedal
-                    model={model}
-                    knobValues={knobValues}
-                    onChange={(newValues) => {
-                      form.setFieldValue("knobValues", newValues);
-                    }}
-                    disabled={disabled}
-                  />
-                </div>
-              </div>
-
-              <Separator />
-
-              <CardContent className="py-4">
-                <div className="grid grid-cols-1 gap-x-10 gap-y-4 md:grid-cols-2">
+            <KnobsPanel
+              model={model}
+              knobValues={knobValues}
+              onChange={(newValues) => {
+                form.setFieldValue("knobValues", newValues);
+              }}
+              title={t("knob-values-title")}
+            >
+              <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
                   {Object.entries(model.knobs).map(
                     ([knobName, [minValue, maxValue]]) => (
                       <form.Field
@@ -51,7 +45,7 @@ export const KnobsForm = withForm({
                             field.state.meta.errors
                           );
                           const isDisabled =
-                            disabled || (knobName === "ir_cab" && disableIR);
+                            knobName === "ir_cab" && disableIR;
                           const label = knobName.replaceAll("_", " ");
                           const value =
                             typeof field.state.value === "number"
@@ -61,7 +55,8 @@ export const KnobsForm = withForm({
                           return (
                             <fieldset
                               className={clsx(
-                                "grid grid-cols-[4.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-3 gap-y-1",
+                                // Same block treatment as the details page values.
+                                "grid grid-cols-[4.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-3 gap-y-1 rounded-lg bg-muted/50 px-3.5 py-2.5",
                                 knobName === "ir_cab" &&
                                   disableIR &&
                                   "opacity-40"
@@ -75,7 +70,9 @@ export const KnobsForm = withForm({
                               </label>
                               <Slider
                                 id={field.name}
-                                className="min-w-0"
+                                // The default `bg-muted` track washes out on the
+                                // muted block, so lift it to the border colour.
+                                className="min-w-0 [&_[data-slot=slider-track]]:bg-border"
                                 value={[value]}
                                 min={minValue}
                                 max={maxValue}
@@ -119,8 +116,7 @@ export const KnobsForm = withForm({
                     )
                   )}
                 </div>
-              </CardContent>
-            </Card>
+            </KnobsPanel>
           ) : null
         }
       </form.Subscribe>

@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
-import { useMemo } from "react";
 import { ArrowRightIcon, UserCircleIcon } from "lucide-react";
 
 import {
@@ -11,6 +10,7 @@ import {
   CardFooter,
   CardTitle,
 } from "@/components/ui/card";
+import { useModelColors } from "../hooks/useModelColors";
 import { Preset } from "../services/presetService";
 import { VoteTally } from "./VoteTally";
 
@@ -21,31 +21,7 @@ interface PresetCardProps {
 
 export const PresetCard = ({ preset, modelName }: PresetCardProps) => {
   const { t } = useTranslation();
-
-  const modelColors = useMemo(() => {
-    switch (preset.model_id) {
-      case "cube-baby":
-        return {
-          background: "bg-neutral-900",
-          text: "text-gray-100",
-        };
-      case "cube-baby-ac":
-        return {
-          background: "bg-amber-200",
-          text: "text-gray-900",
-        };
-      case "cube-baby-bass":
-        return {
-          background: "bg-sky-900",
-          text: "text-gray-100",
-        };
-      default:
-        return {
-          background: "bg-secondary",
-          text: "text-secondary-foreground",
-        };
-    }
-  }, [preset.model_id]);
+  const modelColors = useModelColors(preset.model_id);
 
   const description = preset.description?.trim();
   const username = preset.user?.username?.trim();

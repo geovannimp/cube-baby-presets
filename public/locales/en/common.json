@@ -15,10 +15,13 @@
   "home-see-more-button": "See more",
   "home-presets-empty": "No presets yet",
   "home-latest-presets-title": "Latest presets",
-  "vote-tally-no-votes": "No votes yet",
   "vote-tally-aria": "{{upCount}} likes, {{downCount}} dislikes",
   "vote-button-like": "Like",
   "vote-group-aria": "Vote on this preset",
   "vote-button-dislike": "Dislike",
-  "vote-toggle-hint": "Click again to undo your vote"
+  "vote-toggle-hint": "Click again to undo your vote",
+  "knob-values-title": "Knob values",
+  "preset-not-found-title": "Preset not found",
+  "preset-not-found-description": "This preset does not exist or was deleted by its author.",
+  "preset-not-found-back-button": "Back to presets"
 }
