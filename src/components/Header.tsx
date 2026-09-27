@@ -3,10 +3,10 @@ import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { useTheme } from "next-themes";
 import {
+  HeartIcon,
   IdCardIcon,
   LogOutIcon,
   PaletteIcon,
-  UserIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -137,17 +137,17 @@ export const Header = () => {
                   <DropdownMenuGroup>
                     <DropdownMenuItem
                       nativeButton={false}
-                      render={<Link href="/account" />}
-                    >
-                      <UserIcon data-icon="inline-start" />
-                      {t("account-button")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      nativeButton={false}
                       render={<Link href={`/profile/${user.id}`} />}
                     >
                       <IdCardIcon data-icon="inline-start" />
                       {t("profile-button")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      nativeButton={false}
+                      render={<Link href={`/profile/${user.id}?tab=liked`} />}
+                    >
+                      <HeartIcon data-icon="inline-start" />
+                      {t("liked-presets-button")}
                     </DropdownMenuItem>
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger>

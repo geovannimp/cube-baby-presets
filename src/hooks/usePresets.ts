@@ -15,6 +15,7 @@ export const usePresets = (
       options?.pageSize,
       options?.asOf,
       options?.sort,
+      options?.likedByUserId,
     ],
     async () => PresetService.getPresets(options),
     { enabled }

@@ -1,4 +1,11 @@
 {
+  "tab-presets": "Presets",
+  "tab-liked": "Curtidos",
   "presets-list-title": "Todos presets",
-  "presets-list-empty": "Nenhum preset ainda"
+  "presets-list-title-own": "Seus presets",
+  "presets-list-button": "Adicionar preset",
+  "presets-list-empty": "Nenhum preset ainda",
+  "presets-list-empty-own": "Você ainda não tem presets",
+  "liked-list-title": "Presets curtidos",
+  "liked-list-empty": "Nenhum preset curtido ainda"
 }
