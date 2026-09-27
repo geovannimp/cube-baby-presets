@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
@@ -14,6 +15,7 @@ import {
 import { Header } from "../../components/Header";
 import { Container } from "../../components/Container";
 import { PresetsList } from "../../components/PresetsList";
+import { Button } from "@/components/ui/button";
 import {
   Tabs,
   TabsContent,
@@ -22,6 +24,7 @@ import {
 } from "@/components/ui/tabs";
 import { usePresets } from "../../hooks/usePresets";
 import { useModels } from "../../hooks/useModels";
+import { useUser } from "../../hooks/useUser";
 import nextI18nextConfig from "../../../next-i18next.config";
 import { useProfile } from "../../hooks/useProfile";
 import { DEFAULT_PRESETS_PAGE_SIZE } from "../../services/presetService";
@@ -80,6 +83,10 @@ const Profile: NextPage = () => {
   } = usePresets(likedOptions, { enabled: Boolean(likedOptions) });
   const { data: models, isLoading: isLoadingModels } = useModels();
   const { data: profile } = useProfile(resolvedUserId);
+  const { user } = useUser();
+
+  // The "New preset" action only belongs on your own profile.
+  const isOwnProfile = Boolean(user?.id && user.id === resolvedUserId);
 
   // Only the active tab's query is enabled, so the inactive one is idle and
   // contributes nothing to the loading state.
@@ -98,10 +105,23 @@ const Profile: NextPage = () => {
     void setQuery({ page: nextPage <= 1 ? null : nextPage });
   };
 
+  // On your own profile the wording stays personal, matching what the old
+  // account page said.
+  const presetsListTitle = isOwnProfile
+    ? t("presets-list-title-own")
+    : t("presets-list-title");
+  const presetsListEmpty = isOwnProfile
+    ? t("presets-list-empty-own")
+    : t("presets-list-empty");
+
   return (
     <>
       <Head>
-        <title>Cube Baby Presets - Account</title>
+        <title>
+          {profile?.username
+            ? `Cube Baby Presets - ${profile.username}`
+            : "Cube Baby Presets - Profile"}
+        </title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -132,8 +152,16 @@ const Profile: NextPage = () => {
           </TabsList>
 
           <TabsContent value="presets" className="flex flex-col gap-4">
-            <div className="flex flex-row items-center justify-between">
-              <p className="text-2xl font-bold">{t("presets-list-title")}</p>
+            <div className="flex flex-row items-center justify-between gap-3">
+              <p className="text-2xl font-bold">{presetsListTitle}</p>
+              {isOwnProfile ? (
+                <Button
+                  nativeButton={false}
+                  render={<Link href="/presets/new" />}
+                >
+                  {t("presets-list-button")}
+                </Button>
+              ) : null}
             </div>
 
             <PresetsList
@@ -143,7 +171,7 @@ const Profile: NextPage = () => {
               page={page}
               pageSize={DEFAULT_PRESETS_PAGE_SIZE}
               totalCount={presetsData?.totalCount ?? 0}
-              emptyTitle={t("presets-list-empty")}
+              emptyTitle={presetsListEmpty}
               onPageChange={onPageChange}
             />
           </TabsContent>

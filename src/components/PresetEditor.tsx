@@ -82,7 +82,7 @@ export const PresetEditor = ({ preset }: PresetEditorProps) => {
 
       await createPreset(payload);
       toast.success(t("submit-success-message"));
-      router.replace("/account");
+      router.replace(`/profile/${user.id}`);
     },
   });
 

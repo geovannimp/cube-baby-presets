@@ -66,7 +66,7 @@ const SignIn = () => {
 
   useEffect(() => {
     if (user) {
-      router.replace("/account");
+      router.replace(`/profile/${user.id}`);
     }
   }, [user, router]);
 

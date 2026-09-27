@@ -12,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useDeletePreset } from "../hooks/useDeletePreset";
+import { useUser } from "../hooks/useUser";
 
 interface DeletePresetDialog {
   presetId: number;
@@ -26,10 +27,13 @@ export const DeletePresetDialog = ({
 }: DeletePresetDialog) => {
   const { t } = useTranslation("preset");
   const router = useRouter();
+  const { user } = useUser();
   const { mutateAsync: deletePresetAsync } = useDeletePreset();
 
   const deletePreset = () => {
-    deletePresetAsync(presetId).then(() => router.replace("/account"));
+    deletePresetAsync(presetId).then(() =>
+      router.replace(user ? `/profile/${user.id}` : "/")
+    );
   };
 
   return (

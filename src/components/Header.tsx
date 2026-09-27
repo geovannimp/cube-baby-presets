@@ -7,7 +7,6 @@ import {
   IdCardIcon,
   LogOutIcon,
   PaletteIcon,
-  UserIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -136,13 +135,6 @@ export const Header = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      nativeButton={false}
-                      render={<Link href="/account" />}
-                    >
-                      <UserIcon data-icon="inline-start" />
-                      {t("account-button")}
-                    </DropdownMenuItem>
                     <DropdownMenuItem
                       nativeButton={false}
                       render={<Link href={`/profile/${user.id}`} />}
