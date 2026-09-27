@@ -50,6 +50,8 @@ export interface GetPresetsOptions {
   pageSize?: number;
   asOf?: string;
   sort?: PresetSort;
+  /** Only presets this user upvoted, whatever their author. */
+  likedByUserId?: string;
 }
 
 export interface GetPresetsResult {
@@ -86,17 +88,28 @@ const getPresets = async ({
   pageSize = DEFAULT_PRESETS_PAGE_SIZE,
   asOf,
   sort = "recent",
+  likedByUserId,
 }: GetPresetsOptions = {}): Promise<GetPresetsResult> => {
   const safePage = Math.max(page, 1);
   const from = (safePage - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  // The like filter lives on `preset_votes`, so it needs an inner join embedded
+  // in the select: PostgREST only applies the `!inner` filters as a real join,
+  // which is also what keeps the count and the range in step with the filter.
+  const select = likedByUserId
+    ? `${PRESET_SELECT}, liked:preset_votes!inner(value)`
+    : PRESET_SELECT;
+
   let query = getSupabase()
     .from("presets")
-    .select(PRESET_SELECT, { count: "exact" });
+    .select(select, { count: "exact" });
 
   if (userId) {
     query = query.eq("user_id", userId);
+  }
+  if (likedByUserId) {
+    query = query.eq("liked.user_id", likedByUserId).eq("liked.value", 1);
   }
   if (modelId) {
     query = query.eq("model_id", modelId);

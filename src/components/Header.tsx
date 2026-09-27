@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { useTheme } from "next-themes";
 import {
+  HeartIcon,
   IdCardIcon,
   LogOutIcon,
   PaletteIcon,
@@ -148,6 +149,13 @@ export const Header = () => {
                     >
                       <IdCardIcon data-icon="inline-start" />
                       {t("profile-button")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      nativeButton={false}
+                      render={<Link href={`/profile/${user.id}?tab=liked`} />}
+                    >
+                      <HeartIcon data-icon="inline-start" />
+                      {t("liked-presets-button")}
                     </DropdownMenuItem>
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger>
