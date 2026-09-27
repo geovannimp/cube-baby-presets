@@ -1,18 +1,18 @@
 {
+  "presets-list-pagination-status": "Page {{page}} of {{totalPages}} ({{total}} presets)",
+  "presets-list-pagination-previous": "Previous",
+  "presets-list-pagination-next": "Next",
+  "presets-list-model-filter-all": "All models",
+  "presets-list-user-filter-all": "All users",
+  "presets-list-sort-recent": "Newest",
+  "presets-list-sort-liked": "Most liked",
+  "presets-list-sort-disliked": "Most disliked",
   "presets-list-title": "All presets",
   "presets-list-button": "New preset",
-  "presets-list-empty": "No presets yet",
   "presets-list-search-filter": "Search",
   "presets-list-search-filter-placeholder": "Search presets",
   "presets-list-model-filter": "Model",
-  "presets-list-model-filter-all": "All models",
   "presets-list-user-filter": "User",
-  "presets-list-user-filter-all": "All users",
-  "presets-list-pagination-previous": "Previous",
-  "presets-list-pagination-next": "Next",
-  "presets-list-pagination-status": "Page {{page}} of {{totalPages}} ({{total}} presets)",
   "presets-list-sort": "Sort",
-  "presets-list-sort-recent": "Newest",
-  "presets-list-sort-liked": "Most liked",
-  "presets-list-sort-disliked": "Most disliked"
+  "presets-list-empty": "No presets yet"
 }

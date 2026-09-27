@@ -1,18 +1,18 @@
 {
   "username-field-required-error": "Username is required",
-  "username-unavailable-error": "Username already used",
   "email-field-required-error": "Email is required",
   "email-field-validation-error": "Invalid email",
   "password-field-required-error": "Password is required",
   "password-field-min-length-error": "Password must have at least 6 characters",
   "password-confirmation-do-not-match": "Passwords don't match",
+  "username-unavailable-error": "Username already used",
   "submit-success-message": "Please, check you email to confirm your account",
+  "signup-button": "Sign Up",
+  "with-account": "Do you have an account?",
+  "with-account-link": "Sign in.",
   "username-field": "Username",
   "email-field": "Email",
   "password-field": "Password",
   "password-field-description": "Must be at least 6 characters.",
-  "confirm-password-field": "Confirm password",
-  "signup-button": "Sign Up",
-  "with-account": "Do you have an account?",
-  "with-account-link": "Sign in."
+  "confirm-password-field": "Confirm password"
 }

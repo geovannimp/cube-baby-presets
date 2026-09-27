@@ -1,11 +1,11 @@
 {
+  "presets-list-title-own": "Your presets",
+  "presets-list-title": "All presets",
+  "presets-list-empty-own": "You don't have presets yet",
+  "presets-list-empty": "No presets yet",
   "tab-presets": "Presets",
   "tab-liked": "Liked presets",
-  "presets-list-title": "All presets",
-  "presets-list-title-own": "Your presets",
   "presets-list-button": "New Preset",
-  "presets-list-empty": "No presets yet",
-  "presets-list-empty-own": "You don't have presets yet",
   "liked-list-title": "Liked presets",
   "liked-list-empty": "No liked presets yet"
 }
