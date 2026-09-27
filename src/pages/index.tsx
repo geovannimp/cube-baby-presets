@@ -7,14 +7,16 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
-import { Spinner } from "@/components/ui/spinner";
 import { Header } from "../components/Header";
 import { Container } from "../components/Container";
 import { Logo } from "../components/Logo";
 import { PresetCard } from "../components/PresetCard";
+import { PresetCardSkeleton } from "../components/PresetCardSkeleton";
 import { useModels } from "../hooks/useModels";
 import { usePresets } from "../hooks/usePresets";
 import nextI18nextConfig from "../../next-i18next.config";
+
+const LATEST_PRESETS_SKELETON_COUNT = 3;
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common");
@@ -62,8 +64,18 @@ const Home: NextPage = () => {
               </h2>
 
               {isLoading ? (
-                <div className="flex justify-center py-12">
-                  <Spinner className="size-8" />
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="grid grid-cols-1 gap-6 md:grid-cols-3"
+                >
+                  <span className="sr-only">
+                    {t("home-latest-presets-loading")}
+                  </span>
+                  {Array.from(
+                    { length: LATEST_PRESETS_SKELETON_COUNT },
+                    (_, index) => <PresetCardSkeleton key={index} />
+                  )}
                 </div>
               ) : latestPresets.length ? (
                 <>

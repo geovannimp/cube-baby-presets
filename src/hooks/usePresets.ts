@@ -18,6 +18,8 @@ export const usePresets = (
       options?.likedByUserId,
     ],
     async () => PresetService.getPresets(options),
-    { enabled }
+    // Keep the previous page on screen (behind the skeleton) so the
+    // pagination totals stay visible while the next page loads.
+    { enabled, keepPreviousData: true }
   );
 };

@@ -14,5 +14,6 @@
   "presets-list-model-filter": "Model",
   "presets-list-user-filter": "User",
   "presets-list-sort": "Sort",
-  "presets-list-empty": "No presets yet"
+  "presets-list-empty": "No presets yet",
+  "presets-list-loading": "Loading presets"
 }
