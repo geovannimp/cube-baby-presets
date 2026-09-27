@@ -6,20 +6,20 @@ import { queryClient } from "../utils/queryClient";
 // (`["preset-vote", presetId, userId]`) and every preset list showing the
 // counts have to be refetched.
 const invalidateVotes = () => {
-  void queryClient.invalidateQueries(["preset-vote"]);
-  void queryClient.invalidateQueries(["presets"]);
+  void queryClient.invalidateQueries({ queryKey: ["preset-vote"] });
+  void queryClient.invalidateQueries({ queryKey: ["presets"] });
 };
 
 export const useVotePreset = () => {
-  const { mutate: vote, isLoading: isVoting } = useMutation(
-    VoteService.votePreset,
-    { onSuccess: invalidateVotes }
-  );
+  const { mutate: vote, isPending: isVoting } = useMutation({
+    mutationFn: VoteService.votePreset,
+    onSuccess: invalidateVotes,
+  });
 
-  const { mutate: remove, isLoading: isRemoving } = useMutation(
-    VoteService.removeVote,
-    { onSuccess: invalidateVotes }
-  );
+  const { mutate: remove, isPending: isRemoving } = useMutation({
+    mutationFn: VoteService.removeVote,
+    onSuccess: invalidateVotes,
+  });
 
   return { vote, remove, isPending: isVoting || isRemoving };
 };

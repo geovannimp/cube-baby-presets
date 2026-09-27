@@ -21,12 +21,12 @@ const LATEST_PRESETS_SKELETON_COUNT = 3;
 const Home: NextPage = () => {
   const { t } = useTranslation("common");
   const [asOf] = useState(() => new Date().toISOString());
-  const { data, isLoading: isLoadingPresets } = usePresets({
+  const { data, isPending: isLoadingPresets } = usePresets({
     page: 1,
     pageSize: 3,
     asOf,
   });
-  const { data: models, isLoading: isLoadingModels } = useModels();
+  const { data: models, isPending: isLoadingModels } = useModels();
 
   const isLoading = isLoadingPresets || isLoadingModels;
   const latestPresets = data?.presets ?? [];
