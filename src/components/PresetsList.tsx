@@ -3,10 +3,12 @@ import { useTranslation } from "next-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
-import { Spinner } from "@/components/ui/spinner";
 import { PresetCard } from "./PresetCard";
+import { PresetCardSkeleton } from "./PresetCardSkeleton";
 import { Preset } from "../services/presetService";
 import { Model } from "../services/modelService";
+
+const SKELETON_CARD_COUNT = 6;
 
 type PresetsListProps = {
   presets: Preset[];
@@ -36,8 +38,15 @@ export const PresetsList = ({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <Spinner className="size-8" />
+      <div
+        role="status"
+        aria-live="polite"
+        className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3"
+      >
+        <span className="sr-only">{t("presets-list-loading")}</span>
+        {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
+          <PresetCardSkeleton key={index} />
+        ))}
       </div>
     );
   }

@@ -23,6 +23,7 @@
   "vote-toggle-hint": "Click again to undo your vote",
   "vote-tally-aria": "{{upCount}} likes, {{downCount}} dislikes",
   "home-latest-presets-title": "Latest presets",
+  "home-latest-presets-loading": "Loading latest presets",
   "home-see-more-button": "See more",
   "home-presets-empty": "No presets yet"
 }
