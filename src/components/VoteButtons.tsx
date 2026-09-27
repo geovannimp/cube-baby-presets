@@ -20,14 +20,12 @@ type VoteButtonsProps = {
 const OPTIONS = [
   {
     value: LIKE,
-    labelKey: "vote-button-like",
     icon: ThumbsUpIcon,
     activeClassName:
       "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400",
   },
   {
     value: DISLIKE,
-    labelKey: "vote-button-dislike",
     icon: ThumbsDownIcon,
     activeClassName: "bg-destructive/10 text-destructive",
   },
@@ -47,9 +45,15 @@ export const VoteButtons = ({
   return (
     <ButtonGroup className={className} aria-label={t("vote-group-aria")}>
       {OPTIONS.map(
-        ({ value: option, labelKey, icon: Icon, activeClassName }) => {
-          const count = option === LIKE ? upCount : downCount;
+        ({ value: option, icon: Icon, activeClassName }) => {
+          const isLike = option === LIKE;
+          const count = isLike ? upCount : downCount;
           const isActive = value === option;
+          // The keys stay inline as literals: i18next-parser only extracts
+          // strings passed straight to `t()`.
+          const label = isLike
+            ? t("vote-button-like")
+            : t("vote-button-dislike");
 
           return (
             <Button
@@ -58,7 +62,7 @@ export const VoteButtons = ({
               type="button"
               variant="outline"
               aria-pressed={isActive}
-              aria-label={`${t(labelKey)} (${count})`}
+              aria-label={`${label} (${count})`}
               title={t("vote-toggle-hint")}
               disabled={disabled}
               // Voting the same way twice clears the vote.
