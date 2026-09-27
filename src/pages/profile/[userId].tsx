@@ -75,15 +75,15 @@ const Profile: NextPage = () => {
 
   const {
     data: presetsData,
-    isLoading: isLoadingPresets,
-    isPreviousData: isPreviousDataPresets,
+    isPending: isLoadingPresets,
+    isPlaceholderData: isPlaceholderDataPresets,
   } = usePresets(presetsOptions, { enabled: Boolean(presetsOptions) });
   const {
     data: likedData,
-    isLoading: isLoadingLiked,
-    isPreviousData: isPreviousDataLiked,
+    isPending: isLoadingLiked,
+    isPlaceholderData: isPlaceholderDataLiked,
   } = usePresets(likedOptions, { enabled: Boolean(likedOptions) });
-  const { data: models, isLoading: isLoadingModels } = useModels();
+  const { data: models, isPending: isLoadingModels } = useModels();
   const { data: profile } = useProfile(resolvedUserId);
   const { user } = useUser();
 
@@ -95,8 +95,8 @@ const Profile: NextPage = () => {
   const isLoading =
     isLoadingModels ||
     (tab === "liked"
-      ? isLoadingLiked || isPreviousDataLiked
-      : isLoadingPresets || isPreviousDataPresets);
+      ? isLoadingLiked || isPlaceholderDataLiked
+      : isLoadingPresets || isPlaceholderDataPresets);
 
   const handleTabChange = (nextTab: string | null) => {
     if (nextTab !== "presets" && nextTab !== "liked") return;

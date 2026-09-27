@@ -3,7 +3,8 @@ import { Preset, PresetService } from "../services/presetService";
 import { queryClient } from "../utils/queryClient";
 
 export const useDeletePreset = () => {
-  return useMutation(PresetService.deletePreset, {
+  return useMutation({
+    mutationFn: PresetService.deletePreset,
     onSuccess: (data, preserId) => {
       queryClient.setQueryData(
         ["presets"],

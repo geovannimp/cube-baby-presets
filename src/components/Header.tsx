@@ -67,7 +67,7 @@ export const Header = () => {
   const { user } = useUser();
   const router = useRouter();
   const { setTheme } = useTheme();
-  const { data: profile, isLoading: isProfileLoading } = useProfile(user?.id);
+  const { data: profile, isPending: isProfileLoading } = useProfile(user?.id);
   const isScrolled = useScrolledPast(8);
 
   const isHome = router.pathname === "/";

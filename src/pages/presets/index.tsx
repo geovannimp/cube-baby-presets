@@ -38,8 +38,8 @@ import {
 const Presets: NextPage = () => {
   const { t } = useTranslation("presets");
   const { user } = useUser();
-  const { data: models, isLoading: isLoadingModels } = useModels();
-  const { data: authors, isLoading: isLoadingAuthors } = usePresetAuthors();
+  const { data: models, isPending: isLoadingModels } = useModels();
+  const { data: authors, isPending: isLoadingAuthors } = usePresetAuthors();
   const [asOf, setAsOf] = useState(() => new Date().toISOString());
 
   const [{ search, modelId, userId, page, sort }, setQuery] = useQueryStates({
@@ -72,11 +72,11 @@ const Presets: NextPage = () => {
     [search, modelId, userId, page, asOf, sort]
   );
 
-  const { data, isLoading: isLoadingPresets, isPreviousData } =
+  const { data, isPending: isLoadingPresets, isPlaceholderData } =
     usePresets(presetsQuery);
 
   const isLoading =
-    isLoadingPresets || isPreviousData || isLoadingModels || isLoadingAuthors;
+    isLoadingPresets || isPlaceholderData || isLoadingModels || isLoadingAuthors;
 
   const modelSelectItems = useMemo(
     () => [

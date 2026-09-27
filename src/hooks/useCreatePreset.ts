@@ -3,7 +3,8 @@ import { Preset, PresetService } from "../services/presetService";
 import { queryClient } from "../utils/queryClient";
 
 export const useCreatePreset = () => {
-  return useMutation(PresetService.createPreset, {
+  return useMutation({
+    mutationFn: PresetService.createPreset,
     onSuccess: (data) => {
       queryClient.setQueryData(["presets"], (currentData?: Preset[]) => [
         ...(currentData ?? []),

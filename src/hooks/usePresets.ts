@@ -1,12 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { GetPresetsOptions, PresetService } from "../services/presetService";
 
 export const usePresets = (
   options?: GetPresetsOptions,
   { enabled = true }: { enabled?: boolean } = {}
 ) => {
-  return useQuery(
-    [
+  return useQuery({
+    queryKey: [
       "presets",
       options?.userId,
       options?.modelId,
@@ -17,9 +17,10 @@ export const usePresets = (
       options?.sort,
       options?.likedByUserId,
     ],
-    async () => PresetService.getPresets(options),
+    queryFn: async () => PresetService.getPresets(options),
+    enabled,
     // Keep the previous page on screen (behind the skeleton) so the
     // pagination totals stay visible while the next page loads.
-    { enabled, keepPreviousData: true }
-  );
+    placeholderData: keepPreviousData,
+  });
 };
