@@ -8,8 +8,6 @@ import { PresetCardSkeleton } from "./PresetCardSkeleton";
 import { Preset } from "../services/presetService";
 import { Model } from "../services/modelService";
 
-const SKELETON_CARD_COUNT = 6;
-
 type PresetsListProps = {
   presets: Preset[];
   models?: Model[];
@@ -44,7 +42,7 @@ export const PresetsList = ({
         className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3"
       >
         <span className="sr-only">{t("presets-list-loading")}</span>
-        {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
+        {Array.from({ length: pageSize }, (_, index) => (
           <PresetCardSkeleton key={index} />
         ))}
       </div>
