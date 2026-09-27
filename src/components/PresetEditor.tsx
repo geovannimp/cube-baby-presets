@@ -48,6 +48,20 @@ export const PresetEditor = ({ preset }: PresetEditorProps) => {
 
   const mode = preset ? "editing" : "creating";
 
+  // Both contexts are spelled out on purpose: i18next-parser reads the options
+  // object statically, so `{ context: mode }` would emit a bogus `*_mode` key
+  // and drop `*_creating` / `*_editing` from the catalogs.
+  const modeLabels = {
+    creating: {
+      title: t("preset-title", { context: "creating" }),
+      submitButton: t("preset-submit-button", { context: "creating" }),
+    },
+    editing: {
+      title: t("preset-title", { context: "editing" }),
+      submitButton: t("preset-submit-button", { context: "editing" }),
+    },
+  };
+
   const schema = usePresetFormSchema(models);
 
   const form = useAppForm({
@@ -124,7 +138,7 @@ export const PresetEditor = ({ preset }: PresetEditorProps) => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-3 flex w-full flex-col gap-10 fill-mode-both duration-700 ease-out motion-reduce:animate-none">
       <h1 className="font-heading max-w-[18ch] text-4xl leading-[1.05] font-bold tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
-        {t("preset-title", { context: mode })}
+        {modeLabels[mode].title}
       </h1>
 
       <form
@@ -330,7 +344,7 @@ export const PresetEditor = ({ preset }: PresetEditorProps) => {
                         {isSubmitting ? (
                           <Spinner />
                         ) : (
-                          <>{t("preset-submit-button", { context: mode })}</>
+                          <>{modeLabels[mode].submitButton}</>
                         )}
                       </Button>
                     )}
