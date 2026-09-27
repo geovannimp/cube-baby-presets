@@ -72,9 +72,14 @@ const Presets: NextPage = () => {
     [search, modelId, userId, page, asOf, sort]
   );
 
-  const { data, isLoading: isLoadingPresets } = usePresets(presetsQuery);
+  const {
+    data,
+    isLoading: isLoadingPresets,
+    isPlaceholderData,
+  } = usePresets(presetsQuery);
 
-  const isLoading = isLoadingPresets || isLoadingModels || isLoadingAuthors;
+  const isLoading =
+    isLoadingPresets || isPlaceholderData || isLoadingModels || isLoadingAuthors;
 
   const modelSelectItems = useMemo(
     () => [

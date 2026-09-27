@@ -76,10 +76,12 @@ const Profile: NextPage = () => {
   const {
     data: presetsData,
     isLoading: isLoadingPresets,
+    isPlaceholderData: isPlaceholderDataPresets,
   } = usePresets(presetsOptions, { enabled: Boolean(presetsOptions) });
   const {
     data: likedData,
     isLoading: isLoadingLiked,
+    isPlaceholderData: isPlaceholderDataLiked,
   } = usePresets(likedOptions, { enabled: Boolean(likedOptions) });
   const { data: models, isLoading: isLoadingModels } = useModels();
   const { data: profile } = useProfile(resolvedUserId);
@@ -91,7 +93,10 @@ const Profile: NextPage = () => {
   // Only the active tab's query is enabled, so the inactive one is idle and
   // contributes nothing to the loading state.
   const isLoading =
-    isLoadingModels || (tab === "liked" ? isLoadingLiked : isLoadingPresets);
+    isLoadingModels ||
+    (tab === "liked"
+      ? isLoadingLiked || isPlaceholderDataLiked
+      : isLoadingPresets || isPlaceholderDataPresets);
 
   const handleTabChange = (nextTab: string | null) => {
     if (nextTab !== "presets" && nextTab !== "liked") return;
